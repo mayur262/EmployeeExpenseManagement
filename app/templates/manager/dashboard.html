@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/manager_dashboard.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <h1>Manager Approvals Dashboard</h1>
+    <p>Review and act on travel requests and expense claims submitted by your direct reports</p>
+</div>
+
+<!-- Travel Requests Section -->
+<div class="section-title">
+    <span>Pending Travel Requests</span>
+    <span class="count-badge">{{ pending_travel|length }}</span>
+</div>
+
+<div class="glass-card" style="padding: 1.5rem;">
+    {% if pending_travel %}
+    <div class="table-wrap" style="margin-bottom: 0;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Requester</th>
+                    <th>Destination</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Est. Budget (INR)</th>
+                    <th>Purpose</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in pending_travel %}
+                <tr>
+                    <td><strong>{{ req.employee.first_name }} {{ req.employee.last_name }}</strong></td>
+                    <td>{{ req.destination }}</td>
+                    <td>{{ req.start_date.strftime('%d %b %Y') }}</td>
+                    <td>{{ req.end_date.strftime('%d %b %Y') }}</td>
+                    <td><strong>{{ "%.2f"|format(req.estimated_budget) }}</strong></td>
+                    <td style="color: #6c757d">{{ req.purpose[:40] }}{% if req.purpose|length > 40 %}...{% endif %}</td>
+                    <td>
+                        <a href="{{ url_for('manager.view_travel', request_id=req.id) }}" class="btn" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">Review</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h4>No Pending Travel Requests</h4>
+        <p>No direct reports have submitted travel requests awaiting approval.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Expense Claims Section -->
+<div class="section-title">
+    <span>Pending Expense Claims</span>
+    <span class="count-badge">{{ pending_expenses|length }}</span>
+</div>
+
+<div class="glass-card" style="padding: 1.5rem;">
+    {% if pending_expenses %}
+    <div class="table-wrap" style="margin-bottom: 0;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Requester</th>
+                    <th>Title</th>
+                    <th>Linked Travel Request</th>
+                    <th>Total Amount (INR)</th>
+                    <th>Submitted On</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for claim in pending_expenses %}
+                <tr>
+                    <td><strong>{{ claim.employee.first_name }} {{ claim.employee.last_name }}</strong></td>
+                    <td>{{ claim.title }}</td>
+                    <td>
+                        {% if claim.travel_request %}
+                        TR #{{ claim.travel_request.id }} to {{ claim.travel_request.destination }}
+                        {% else %}
+                        <span style="color: #6c757d">None (Standalone)</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: #28a745;"><strong>INR {{ "%.2f"|format(claim.total_amount) }}</strong></td>
+                    <td>{{ claim.created_at.strftime('%d %b %Y') }}</td>
+                    <td>
+                        <a href="{{ url_for('manager.view_expense', claim_id=claim.id) }}" class="btn" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">Review</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h4>No Pending Expense Claims</h4>
+        <p>No direct reports have submitted expense claims awaiting approval.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/admin_dashboard.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <h1>System Admin Panel</h1>
+    <p>Manage users, roles, and expense policies across the organisation.</p>
+</div>
+
+<div class="admin-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value" style="color: #0056b3;">{{ users | length }}</div>
+        <a class="stat-link" href="{{ url_for('admin.manage_users') }}">Manage Users &rarr;</a>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Active Users</div>
+        <div class="stat-value" style="color: #28a745;">{{ users | selectattr('is_active') | list | length }}</div>
+        <a class="stat-link" href="{{ url_for('admin.manage_users') }}">View All &rarr;</a>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Expense Policies</div>
+        <div class="stat-value" style="color: #f59e0b;">{{ policies | length }}</div>
+        <a class="stat-link" href="{{ url_for('admin.manage_policies') }}">Manage Policies &rarr;</a>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <a href="{{ url_for('admin.manage_users') }}" class="btn">Manage Users</a>
+    <a href="{{ url_for('admin.manage_policies') }}" class="btn btn-secondary">Manage Policies</a>
+    <a href="{{ url_for('admin.new_policy') }}" class="btn btn-secondary">+ New Policy</a>
+</div>
+
+<!-- Policy Overview Table -->
+<div class="glass-card" style="padding: 1.5rem;">
+    <h3 style="margin-bottom: 1.2rem; font-size: 1.1rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.78rem;">Active Expense Policies</h3>
+    {% if policies %}
+    <table style="width:100%; border-collapse: collapse; font-size: 0.95rem;">
+        <thead>
+            <tr>
+                <th style="text-align:left; padding:0.7rem 1rem; color: #6c757d; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid var(--glass-border);">Category</th>
+                <th style="text-align:left; padding:0.7rem 1rem; color: #6c757d; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid var(--glass-border);">Max Limit (INR)</th>
+                <th style="text-align:left; padding:0.7rem 1rem; color: #6c757d; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid var(--glass-border);">Role Restriction</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for policy in policies %}
+            <tr style="border-bottom:1px solid var(--glass-border);">
+                <td style="padding:0.9rem 1rem;">{{ policy.category }}</td>
+                <td style="padding:0.9rem 1rem; color:#d97706; font-weight:600;">{{ "%.2f"|format(policy.max_limit_per_expense) }}</td>
+                <td style="padding:0.9rem 1rem; color: #6c757d;">{{ policy.role_restriction or "All Roles" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #6c757d; text-align:center; padding: 2rem;">No policies defined yet. <a href="{{ url_for('admin.new_policy') }}" style="color:var(--accent-color);">Add one now.</a></p>
+    {% endif %}
+</div>
+{% endblock %}

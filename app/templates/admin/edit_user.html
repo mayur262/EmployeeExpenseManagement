@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/admin_edit_user.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <h1>Edit User Role</h1>
+    <p>Change the role for <strong>{{ user.email }}</strong>.</p>
+</div>
+
+<div class="glass-card">
+    <form method="POST" action="">
+        <div class="form-group">
+            <label for="role">Assign Role</label>
+            <select id="role" name="role">
+                {% for r in roles %}
+                <option value="{{ r }}" {% if user.role == r %}selected{% endif %}>{{ r }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn">Save Changes</button>
+            <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

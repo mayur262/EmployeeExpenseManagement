@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<a href="{{ url_for('travel.list_requests') }}" class="back-link"><- Back to Travel Requests</a>
+
+<div class="glass-card form-container">
+    <div class="form-header">
+        <h2>New Travel Request</h2>
+        <p>Fill in the details for your upcoming business trip</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('travel.new_request') }}">
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label for="destination">Destination City / Country</label>
+                <input type="text" id="destination" name="destination" class="form-control" placeholder="e.g. Mumbai, India" required>
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <input type="date" id="start_date" name="start_date" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="end_date">End Date</label>
+                <input type="date" id="end_date" name="end_date" class="form-control" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="estimated_budget">Estimated Budget (INR)</label>
+                <input type="number" id="estimated_budget" name="estimated_budget" class="form-control" placeholder="5000.00" step="0.01" min="0" required>
+                <p class="hint">Provide an accurate estimate including accommodation, transport, and meals.</p>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="purpose">Purpose of Travel</label>
+                <textarea id="purpose" name="purpose" class="form-control" placeholder="Describe the business purpose of this trip..." required></textarea>
+            </div>
+        </div>
+
+        <div>
+            <button type="submit" class="btn">Submit Request</button>
+            <a href="{{ url_for('travel.list_requests') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

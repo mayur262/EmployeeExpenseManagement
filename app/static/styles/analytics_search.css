@@ -1,0 +1,27 @@
+.page-header { margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1.2rem; }
+.page-header h1 { font-size: 1.8rem; }
+.page-header p { color: #6c757d; margin-top: 0.3rem; }
+.search-bar { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 4px; padding: 1.5rem; margin-bottom: 2rem; }
+.search-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end; }
+.field label { display: block; font-size: 0.75rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; font-weight: 600; }
+.field input, .field select {
+    width: 100%; padding: 0.65rem 1rem;
+    background: #ffffff; border: 1px solid var(--glass-border);
+    border-radius: 4px; color: #212529; font-size: 0.95rem;
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent-color); }
+.results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.results-count { font-size: 0.85rem; color: #6c757d; }
+table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+thead th { text-align: left; padding: 0.8rem 1rem; color: #6c757d; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.06em; border-bottom: 1px solid var(--glass-border); }
+tbody tr { border-bottom: 1px solid var(--glass-border); transition: background 0.15s; }
+tbody tr:hover { background: #f8f9fa; }
+tbody td { padding: 0.85rem 1rem; vertical-align: middle; }
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.72rem; font-weight: 600; }
+.badge-Draft     { background:#e2e3e5; color:#383d41; border:1px solid #d6d8db; }
+.badge-Submitted { background:rgba(245,158,11,0.15); color:#d97706; border:1px solid #d97706; }
+.badge-Approved  { background:#cce5ff; color:#004085; border:1px solid #b8daff; }
+.badge-Verified  { background:rgba(52,211,153,0.15); color:#28a745; border:1px solid #10b981; }
+.badge-Rejected  { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+.empty-state { text-align:center; padding:3rem; color: #6c757d; border:1px dashed var(--glass-border); border-radius:12px; }
+@media(max-width:900px) { .search-row { grid-template-columns: 1fr 1fr; } }

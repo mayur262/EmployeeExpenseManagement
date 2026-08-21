@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/admin_manage_policies.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <h1>Expense Policies</h1>
+    <p>Set per-item spending limits for each expense category.</p>
+</div>
+<div class="actions-bar">
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary btn-sm">&larr; Back to Admin</a>
+    <a href="{{ url_for('admin.new_policy') }}" class="btn">+ New Policy</a>
+</div>
+
+<div class="glass-card" style="padding: 1.5rem;">
+    {% if policies %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Category</th>
+                <th>Max Limit Per Item (INR)</th>
+                <th>Role Restriction</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for policy in policies %}
+            <tr>
+                <td style="color: #6c757d;">{{ policy.id }}</td>
+                <td><strong>{{ policy.category }}</strong></td>
+                <td style="color:#d97706; font-weight:600;">{{ "%.2f"|format(policy.max_limit_per_expense) }}</td>
+                <td style="color: #6c757d;">{{ policy.role_restriction or "All Roles" }}</td>
+                <td>
+                    <div style="display:flex; gap:0.5rem;">
+                        <a href="{{ url_for('admin.edit_policy', policy_id=policy.id) }}" class="btn btn-sm"
+                            style="padding:0.3rem 0.7rem; font-size:0.8rem;">Edit</a>
+                        <form method="POST" action="{{ url_for('admin.delete_policy', policy_id=policy.id) }}"
+                            style="display:inline;" onsubmit="return confirm('Delete this policy?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <h4>No Policies Defined</h4>
+        <p>Create your first expense policy to enforce per-item spending limits.</p>
+        <a href="{{ url_for('admin.new_policy') }}" class="btn" style="margin-top:1rem;">+ New Policy</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

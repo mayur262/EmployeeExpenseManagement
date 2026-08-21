@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/admin_edit_policy.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <h1>{% if policy %}Edit Policy{% else %}New Expense Policy{% endif %}</h1>
+    <p>{% if policy %}Update the spending limit for category "{{ policy.category }}".{% else %}Define a new per-item spending limit for an expense category.{% endif %}</p>
+</div>
+
+<div class="glass-card">
+    <form method="POST" action="{{ form_action }}">
+        <div class="form-group">
+            <label for="category">Expense Category</label>
+            {% if policy %}
+            <select id="category" name="category">
+                {% for cat in categories %}
+                <option value="{{ cat }}" {% if policy.category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+            {% else %}
+            <select id="category" name="category">
+                <option value="">-- Select a Category --</option>
+                {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="max_limit">Maximum Limit per Expense Item (INR)</label>
+            <input type="number" id="max_limit" name="max_limit" step="0.01" min="1"
+                   value="{{ policy.max_limit_per_expense if policy else '' }}" required>
+            <div class="hint">Employees will be warned or blocked if a single item exceeds this amount.</div>
+        </div>
+
+        <div class="form-group">
+            <label for="role_restriction">Role Restriction (optional)</label>
+            <select id="role_restriction" name="role_restriction">
+                <option value="">No Restriction (Applies to All Roles)</option>
+                {% for r in roles %}
+                <option value="{{ r }}" {% if policy and policy.role_restriction == r %}selected{% endif %}>{{ r }} only</option>
+                {% endfor %}
+            </select>
+            <div class="hint">If set, the limit applies only to users with this role.</div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn">{% if policy %}Save Changes{% else %}Create Policy{% endif %}</button>
+            <a href="{{ url_for('admin.manage_policies') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

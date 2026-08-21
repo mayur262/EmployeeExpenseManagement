@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/finance_dashboard.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <h1>Finance Admin Dashboard</h1>
+    <p>Review, verify compliance, and process reimbursements for manager-approved expense claims.</p>
+</div>
+
+<!-- Summary Stats -->
+{% set approved_count = claims | selectattr('status', 'equalto', 'Approved') | list | length %}
+{% set verified_count = claims | selectattr('status', 'equalto', 'Verified') | list | length %}
+{% set total_amount = claims | sum(attribute='total_amount') %}
+
+<div class="summary-bar">
+    <div class="stat-card">
+        <div class="stat-label">Awaiting Reimbursement</div>
+        <div class="stat-value" style="color: #0056b3;">{{ approved_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Already Reimbursed</div>
+        <div class="stat-value" style="color: #28a745;">{{ verified_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Value Shown (INR)</div>
+        <div class="stat-value" style="color: #f8fafc;">{{ "%.2f"|format(total_amount) }}</div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <span>Filter by status:</span>
+    <a href="{{ url_for('finance.dashboard') }}" class="filter-btn {% if current_filter == 'All' %}active{% endif %}">All</a>
+    <a href="{{ url_for('finance.dashboard', status='Approved') }}" class="filter-btn {% if current_filter == 'Approved' %}active{% endif %}">Approved (Pending Reimbursement)</a>
+    <a href="{{ url_for('finance.dashboard', status='Verified') }}" class="filter-btn {% if current_filter == 'Verified' %}active{% endif %}">Verified / Reimbursed</a>
+</div>
+
+<!-- Claims Table -->
+<div class="glass-card" style="padding: 1.5rem;">
+    {% if claims %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Claim Title</th>
+                    <th>Total Amount (INR)</th>
+                    <th>Submitted On</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for claim in claims %}
+                <tr>
+                    <td style="color: #6c757d;">{{ claim.id }}</td>
+                    <td>
+                        <strong>{{ claim.employee.first_name }} {{ claim.employee.last_name }}</strong>
+                    </td>
+                    <td style="color: #6c757d;">{{ claim.employee.department }}</td>
+                    <td>{{ claim.title }}</td>
+                    <td>
+                        <strong style="color: #28a745;">{{ "%.2f"|format(claim.total_amount) }}</strong>
+                    </td>
+                    <td style="color: #6c757d;">{{ claim.created_at.strftime('%d %b %Y') }}</td>
+                    <td>
+                        {% if claim.status == 'Approved' %}
+                        <span class="badge badge-approved">Approved</span>
+                        {% elif claim.status == 'Verified' %}
+                        <span class="badge badge-verified">Verified and Reimbursed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('finance.view_claim', claim_id=claim.id) }}" class="btn" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">
+                            Review
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h4>No Claims Found</h4>
+        <p>No expense claims match the current filter. Claims appear here once a manager approves them.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

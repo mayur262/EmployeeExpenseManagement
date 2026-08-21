@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense &amp; Travel Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/base.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <header>
+        <a href="{{ url_for("auth.home") }}" class="logo">Portal.P1</a>
+        <nav>
+            {% if current_user.is_authenticated %}
+                <span style="color: var(--text-muted)">Welcome, <strong>{{ current_user.email }}</strong> ({{ current_user.role }})</span>
+                <a href="{{ url_for("auth.home") }}">Dashboard</a>
+                {% if current_user.role == "Admin" %}
+                    <a href="{{ url_for("admin.dashboard") }}">Admin Panel</a>
+                    <a href="{{ url_for("analytics.dashboard") }}">Analytics</a>
+                {% endif %}
+                {% if current_user.role == "Finance" %}
+                    <a href="{{ url_for("analytics.dashboard") }}">Analytics</a>
+                {% endif %}
+                <a href="{{ url_for("travel.list_requests") }}">Travel Requests</a>
+                <a href="{{ url_for("expense.list_claims") }}">Expense Claims</a>
+                <a href="{{ url_for("auth.logout") }}" class="btn btn-secondary">Logout</a>
+            {% else %}
+                <a href="{{ url_for("auth.login") }}">Login</a>
+                <a href="{{ url_for("auth.register") }}" class="btn">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <div class="alerts">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        &copy; 2026 Corporate Expense &amp; Travel Management Portal (P1)
+    </footer>
+</body>
+</html>

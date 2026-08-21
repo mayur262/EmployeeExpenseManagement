@@ -1,0 +1,16 @@
+.form-container { max-width: 680px; margin: 2rem auto; }
+.form-group { margin-bottom: 1.5rem; }
+.back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #6c757d; text-decoration: none; margin-bottom: 1.5rem; font-weight: 500; transition: color 0.2s; }
+.back-link:hover { color: #212529; }
+label { display: block; margin-bottom: 0.5rem; color: #6c757d; font-weight: 500; }
+.form-control {
+    width: 100%; padding: 0.8rem 1rem; border-radius: 4px;
+    background: #ffffff; border: 1px solid var(--glass-border);
+    color: #212529; font-size: 1rem; outline: none; transition: border-color 0.3s;
+}
+.form-control:focus { border-color: var(--accent-color); }
+textarea.form-control { resize: vertical; min-height: 100px; }
+.form-header { margin-bottom: 2rem; }
+.form-header h2 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+.form-header p { color: #6c757d; }
+.hint { font-size: 0.82rem; color: #6c757d; margin-top: 0.3rem; }

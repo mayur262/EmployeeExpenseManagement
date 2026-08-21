@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/finance_view_claim.css') }}">
+{% endblock %}
+
+<a href="{{ url_for('finance.dashboard') }}" class="back-link">Back to Finance Dashboard</a>
+
+<div class="glass-card">
+
+    <!-- Header -->
+    <div class="detail-header">
+        <div>
+            <h2>{{ claim.title }}</h2>
+            <p>Submitted by {{ claim.employee.first_name }} {{ claim.employee.last_name }} - {{ claim.employee.department }}</p>
+        </div>
+        {% if claim.status == 'Approved' %}
+        <span class="badge badge-approved">Approved - Pending Reimbursement</span>
+        {% elif claim.status == 'Verified' %}
+        <span class="badge badge-verified">Verified and Reimbursed</span>
+        {% endif %}
+    </div>
+
+    <!-- Meta Info -->
+    <div class="meta-grid">
+        <div class="meta-item">
+            <label>Employee</label>
+            <p>{{ claim.employee.first_name }} {{ claim.employee.last_name }} ({{ claim.employee.designation }})</p>
+        </div>
+        <div class="meta-item">
+            <label>Total Claimed Amount</label>
+            <p style="font-size: 1.5rem; color: #28a745;">INR {{ "%.2f"|format(claim.total_amount) }}</p>
+        </div>
+        <div class="meta-item">
+            <label>Department</label>
+            <p>{{ claim.employee.department }}</p>
+        </div>
+        <div class="meta-item">
+            <label>Linked Travel Request</label>
+            <p>
+                {% if claim.travel_request %}
+                TR #{{ claim.travel_request.id }} - {{ claim.travel_request.destination }}
+                {% else %}
+                <span style="color: #6c757d;">None (Standalone Claim)</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="meta-item" style="grid-column: span 2;">
+            <label>Claim Description / Notes</label>
+            <p style="color: #6c757d;">{{ claim.description or 'No additional description provided.' }}</p>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Line Items -->
+    <div class="section-title">Expense Line Items</div>
+    {% if claim.items.count() > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount (INR)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in claim.items.all() %}
+            <tr>
+                <td>{{ item.expense_date.strftime('%d %b %Y') }}</td>
+                <td><strong>{{ item.category }}</strong></td>
+                <td style="color: #6c757d;">{{ item.description or '-' }}</td>
+                <td><strong style="color: #28a745;">{{ "%.2f"|format(item.amount) }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #6c757d; font-style: italic; margin-bottom: 1.5rem;">No line items recorded.</p>
+    {% endif %}
+
+    <hr class="divider">
+
+    <!-- Receipts -->
+    <div class="section-title">Supporting Receipts and Invoices</div>
+    {% if claim.receipts.count() > 0 %}
+    <div class="receipt-list">
+        {% for receipt in claim.receipts.all() %}
+        <div class="receipt-item">
+            <div class="file-info">
+                <span class="file-name">File: {{ receipt.filename }}</span>
+                <span class="file-meta">{{ receipt.file_type }} - {{ (receipt.file_size / 1024)|round(1) }} KB - Uploaded {{ receipt.uploaded_at.strftime('%d %b %Y') }}</span>
+            </div>
+            <a href="{{ url_for('finance.download_receipt', receipt_id=receipt.id) }}" class="btn" style="padding: 0.4rem 1rem; font-size: 0.85rem;">
+                Download
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #6c757d; font-style: italic; margin-bottom: 1.5rem;">No receipt files attached to this claim.</p>
+    {% endif %}
+
+    <hr class="divider">
+
+    <!-- Reimbursement History (if already processed) -->
+    {% if claim.status == 'Verified' %}
+    <div class="section-title">Reimbursement Record</div>
+    {% for reimb in claim.reimbursements.all() %}
+    <div class="reimb-record">
+        <p style="font-weight: 600; color: #28a745;">Reimbursement Processed</p>
+        <div class="reimb-row">
+            <div class="reimb-field">
+                <label>Amount Paid</label>
+                <p style="color: #28a745;">INR {{ "%.2f"|format(reimb.amount_paid) }}</p>
+            </div>
+            <div class="reimb-field">
+                <label>Payment Date</label>
+                <p>{{ reimb.payment_date.strftime('%d %b %Y') if reimb.payment_date else '-' }}</p>
+            </div>
+            <div class="reimb-field">
+                <label>Transaction Reference</label>
+                <p>{{ reimb.transaction_reference or 'N/A' }}</p>
+            </div>
+            <div class="reimb-field">
+                <label>Status</label>
+                <p>{{ reimb.status }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% elif claim.status == 'Approved' %}
+    <!-- Reimburse Action Panel -->
+    <div class="section-title">Finance Action</div>
+    <div class="action-panel">
+        <h3>Mark Claim as Reimbursed</h3>
+        <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1.5rem;">
+            After verifying all receipts and line items for compliance, record the transaction reference
+            and mark this claim as reimbursed. This action is permanent.
+        </p>
+        <form method="POST" action="{{ url_for('finance.reimburse_claim', claim_id=claim.id) }}">
+            <div class="form-group">
+                <label for="transaction_reference">Transaction / Reference Number (optional)</label>
+                <input
+                    type="text"
+                    id="transaction_reference"
+                    name="transaction_reference"
+                    class="form-control"
+                    placeholder="e.g. TXN-2026-08-001 or bank transfer reference"
+                >
+            </div>
+            <button
+                type="submit"
+                class="btn"
+                style="padding: 0.7rem 2rem; background: var(--success); font-size: 1rem; width: 100%;"
+                onclick="return confirm('Mark this claim as reimbursed? This cannot be undone.');"
+            >
+                Confirm Reimbursement - INR {{ "%.2f"|format(claim.total_amount) }}
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

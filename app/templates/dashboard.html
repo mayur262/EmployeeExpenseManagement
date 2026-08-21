@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/dashboard.css') }}">
+{% endblock %}
+
+<div class="dashboard-header">
+    <div>
+        <h1>{{ role }} Dashboard</h1>
+        <p style="color: #6c757d">Welcome to your corporate administration terminal.</p>
+    </div>
+    <span class="badge badge-primary">{{ role }} access active</span>
+</div>
+
+<div class="glass-card">
+    <h2 class="card-title">Phase 3 Complete: Session Authentication Active</h2>
+    <p class="card-desc">Your session has been securely verified, and role restrictions are successfully active for this endpoint. In the next phases, we will populate this dashboard with actions, forms, claims, and approval tables.</p>
+    <div style="display: flex; gap: 1rem;">
+        <a href="#" class="btn">View Profile</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">Sign Out</a>
+    </div>
+</div>
+{% endblock %}

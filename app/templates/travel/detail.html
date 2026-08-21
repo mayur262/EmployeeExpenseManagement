@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<a href="{{ url_for('travel.list_requests') }}" class="back-link"><- Back to Travel Requests</a>
+
+<div class="glass-card">
+    <div class="detail-header">
+        <div>
+            <h2>Travel Request #{{ travel_req.id }}</h2>
+            <p>Submitted on {{ travel_req.created_at.strftime('%d %b %Y at %H:%M') }}</p>
+        </div>
+        <span class="badge badge-{{ travel_req.status.lower() }}">{{ travel_req.status }}</span>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <label>Destination</label>
+            <p>{{ travel_req.destination }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Estimated Budget</label>
+            <p>INR {{ "%.2f"|format(travel_req.estimated_budget) }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Start Date</label>
+            <p>{{ travel_req.start_date.strftime('%d %B %Y') }}</p>
+        </div>
+        <div class="detail-item">
+            <label>End Date</label>
+            <p>{{ travel_req.end_date.strftime('%d %B %Y') }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Duration</label>
+            <p>{{ (travel_req.end_date - travel_req.start_date).days }} day(s)</p>
+        </div>
+        <div class="detail-item">
+            <label>Submitted by</label>
+            <p>{{ travel_req.employee.first_name }} {{ travel_req.employee.last_name }}</p>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <div>
+        <label>Purpose of Travel</label>
+        <div class="purpose-block">
+            <p>{{ travel_req.purpose }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

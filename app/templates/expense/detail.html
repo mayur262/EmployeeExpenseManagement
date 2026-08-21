@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/expense_detail.css') }}">
+{% endblock %}
+
+<a href="{{ url_for('expense.list_claims') }}" class="back-link"><- Back to Expense Claims</a>
+
+<div class="glass-card">
+    <div class="detail-header">
+        <div>
+            <h2>Expense Claim: {{ claim.title }}</h2>
+            <p>Created on {{ claim.created_at.strftime('%d %b %Y') }}</p>
+        </div>
+        <span class="badge badge-{{ claim.status.lower() }}">{{ claim.status }}</span>
+    </div>
+
+    <div class="meta-grid">
+        <div class="meta-item">
+            <label>Employee Name</label>
+            <p>{{ claim.employee.first_name }} {{ claim.employee.last_name }}</p>
+        </div>
+        <div class="meta-item">
+            <label>Total Claim Amount</label>
+            <p style="font-size: 1.4rem; color: #28a745;">INR {{ "%.2f"|format(claim.total_amount) }}</p>
+        </div>
+        <div class="meta-item">
+            <label>Linked Travel Request</label>
+            <p>
+                {% if claim.travel_request %}
+                <a href="{{ url_for('travel.view_request', request_id=claim.travel_request.id) }}" style="color: var(--accent-color); text-decoration: none;">
+                    TR #{{ claim.travel_request.id }} to {{ claim.travel_request.destination }}
+                </a>
+                {% else %}
+                <span style="color: #6c757d">None (Standalone)</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="meta-item">
+            <label>Comments / Description</label>
+            <p>{{ claim.description or 'No comments provided.' }}</p>
+        </div>
+    </div>
+
+    <div class="section-title">Expense Line Items</div>
+    {% if claim.items.count() > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount (INR)</th>
+                {% if claim.status == 'Draft' %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in claim.items.all() %}
+            <tr>
+                <td>{{ item.expense_date.strftime('%d %b %Y') }}</td>
+                <td><strong>{{ item.category }}</strong></td>
+                <td style="color: #6c757d">{{ item.description or '-' }}</td>
+                <td><strong>{{ "%.2f"|format(item.amount) }}</strong></td>
+                {% if claim.status == 'Draft' %}
+                <td>
+                    <form method="POST" action="{{ url_for('expense.delete_item', claim_id=claim.id, item_id=item.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-danger-sm">Delete</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #6c757d; font-style: italic; margin-bottom: 1.5rem;">No line items added yet.</p>
+    {% endif %}
+
+    <div class="section-title">Supporting Receipts & Invoices</div>
+    {% if claim.receipts.count() > 0 %}
+    <div class="receipt-list" style="margin-bottom: 1.5rem;">
+        {% for receipt in claim.receipts.all() %}
+        <div class="receipt-item">
+            <div>
+                <span style="color: #6c757d; font-size: 0.8rem; display:block;">File Name</span>
+                <a href="{{ url_for('static', filename='uploads/' + receipt.filename) }}" target="_blank">
+                    📄 {{ receipt.filename }}
+                </a>
+                <span style="color: #6c757d; font-size: 0.75rem; margin-left: 0.5rem;">
+                    ({{ (receipt.file_size / 1024)|round(1) }} KB)
+                </span>
+            </div>
+            {% if claim.status == 'Draft' %}
+            <form method="POST" action="{{ url_for('expense.delete_receipt', claim_id=claim.id, receipt_id=receipt.id) }}">
+                <button type="submit" class="btn-danger-sm">Remove</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #6c757d; font-style: italic; margin-bottom: 1.5rem;">No receipts attached yet.</p>
+    {% endif %}
+
+    {% if claim.status == 'Draft' %}
+    <div class="claim-action-panel">
+        <!-- Add Item Panel -->
+        <div class="glass-card action-card" style="padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Add Line Item</h3>
+            <form method="POST" action="{{ url_for('expense.add_item', claim_id=claim.id) }}">
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" class="form-control" required>
+                        <option value="Accommodation">Accommodation</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Meals">Meals</option>
+                        <option value="Flight">Flight</option>
+                        <option value="Other">Other business expenses</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount (INR)</label>
+                    <input type="number" id="amount" name="amount" class="form-control" placeholder="1000.00" step="0.01" min="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="expense_date">Date incurred</label>
+                    <input type="date" id="expense_date" name="expense_date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="item_description">Description / Notes</label>
+                    <input type="text" id="item_description" name="description" class="form-control" placeholder="e.g. Hotel stay 2 nights">
+                </div>
+                <button type="submit" class="btn" style="width: 100%; padding: 0.6rem;">Add Item</button>
+            </form>
+        </div>
+
+        <!-- Upload Receipt Panel -->
+        <div class="glass-card action-card" style="padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Upload Invoice / Receipt</h3>
+                <form method="POST" action="{{ url_for('expense.upload_receipt', claim_id=claim.id) }}" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="receipt_file">Select File (PDF, PNG, JPG, JPEG)</label>
+                        <input type="file" id="receipt_file" name="receipt_file" class="form-control" style="padding: 0.4rem;" required>
+                        <p style="font-size: 0.75rem; color: #6c757d; margin-top: 0.4rem;">
+                            Max file size: 16 MB. Only PDF, PNG, and JPG images are supported.
+                        </p>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%; padding: 0.6rem;">Upload File</button>
+                </form>
+            </div>
+            
+            <div style="margin-top: 2rem; border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Submit Claim</h3>
+                <p style="font-size: 0.8rem; color: #6c757d; margin-bottom: 1rem;">
+                    Once submitted, you will no longer be able to add/remove items or receipts.
+                </p>
+                <form method="POST" action="{{ url_for('expense.submit_claim', claim_id=claim.id) }}">
+                    <button type="submit" class="btn" style="width: 100%; padding: 0.7rem; background: var(--success);" {% if claim.items.count() == 0 %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+                        Submit Claim for Approval
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

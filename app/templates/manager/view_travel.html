@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<a href="{{ url_for('manager.dashboard') }}" class="back-link"><- Back to Approvals Dashboard</a>
+
+<div class="glass-card">
+    <div class="detail-header">
+        <div>
+            <h2>Review Travel Request #{{ req.id }}</h2>
+            <p>Submitted by {{ req.employee.first_name }} {{ req.employee.last_name }} on {{ req.created_at.strftime('%d %b %Y') }}</p>
+        </div>
+        <span class="badge badge-pending">Pending Review</span>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <label>Destination</label>
+            <p>{{ req.destination }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Estimated Budget</label>
+            <p>INR {{ "%.2f"|format(req.estimated_budget) }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Start Date</label>
+            <p>{{ req.start_date.strftime('%d %B %Y') }}</p>
+        </div>
+        <div class="detail-item">
+            <label>End Date</label>
+            <p>{{ req.end_date.strftime('%d %B %Y') }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Duration</label>
+            <p>{{ (req.end_date - req.start_date).days }} day(s)</p>
+        </div>
+        <div class="detail-item">
+            <label>Department / Designation</label>
+            <p>{{ req.employee.department }} - {{ req.employee.designation }}</p>
+        </div>
+    </div>
+
+    <div>
+        <label>Purpose of Travel</label>
+        <div class="purpose-block">
+            <p>{{ req.purpose }}</p>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <h3>Action Panel</h3>
+    <form method="POST" action="{{ url_for('manager.approve_travel', request_id=req.id) }}">
+        <div>
+            <label for="comments">Approver Comments / Review Feedback</label>
+            <textarea id="comments" name="comments" class="form-control" placeholder="Write feedback or reason for approval/rejection here..."></textarea>
+        </div>
+        
+        <div>
+            <button type="submit" name="action" value="Approved" class="btn">Approve Request</button>
+            <button type="submit" name="action" value="Rejected" class="btn" style="background: var(--danger);">Reject Request</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

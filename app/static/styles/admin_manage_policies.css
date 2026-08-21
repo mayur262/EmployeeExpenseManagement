@@ -1,0 +1,74 @@
+.page-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 1.2rem;
+}
+
+.page-header h1 {
+    font-size: 1.8rem;
+}
+
+.page-header p {
+    color: #6c757d;
+    margin-top: 0.3rem;
+}
+
+.actions-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+thead th {
+    text-align: left;
+    padding: 0.8rem 1rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+tbody tr {
+    border-bottom: 1px solid var(--glass-border);
+    transition: background 0.2s;
+}
+
+tbody tr:hover {
+    background: #f8f9fa;
+}
+
+tbody td {
+    padding: 0.9rem 1rem;
+    vertical-align: middle;
+}
+
+.btn-sm {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-danger:hover {
+    background: #ef4444;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: #6c757d;
+    border: 1px dashed var(--glass-border);
+    border-radius: 4px;
+}

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/analytics_dashboard.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <h1>Analytics Dashboard</h1>
+    <p>Real-time expense summaries, trends, and departmental breakdowns.</p>
+</div>
+
+<div class="nav-links">
+    <a href="{{ url_for('analytics.search') }}" class="btn btn-secondary">🔍 Search & Filter Claims</a>
+    {% if current_user.role == "Admin" %}
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&larr; Admin Panel</a>
+    {% else %}
+    <a href="{{ url_for('finance.dashboard') }}" class="btn btn-secondary">&larr; Finance Panel</a>
+    {% endif %}
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-label">Total Claims</div>
+        <div class="kpi-value" style="color:#a5b4fc;">{{ summary.total_claims }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Total Spend (Approved+Verified)</div>
+        <div class="kpi-value" style="color:#28a745;">INR {{ "%.2f"|format(summary.total_spend) }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Pending Approval</div>
+        <div class="kpi-value" style="color:#d97706;">{{ summary.Submitted }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Approved</div>
+        <div class="kpi-value" style="color:#60a5fa;">{{ summary.Approved }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Verified / Reimbursed</div>
+        <div class="kpi-value" style="color:#28a745;">{{ summary.Verified }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Rejected</div>
+        <div class="kpi-value" style="color:#f87171;">{{ summary.Rejected }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Travel Requests</div>
+        <div class="kpi-value" style="color:#c084fc;">{{ summary.total_travel_requests }}</div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="charts-grid">
+    <!-- Spend by Category (Doughnut) -->
+    <div class="chart-card">
+        <div class="chart-title">Spend by Category</div>
+        <canvas id="categoryChart"></canvas>
+    </div>
+
+    <!-- Spend by Department (Horizontal Bar) -->
+    <div class="chart-card">
+        <div class="chart-title">Spend by Department</div>
+        <canvas id="deptChart"></canvas>
+    </div>
+
+    <!-- Monthly Trend (Line) -->
+    <div class="chart-card">
+        <div class="chart-title">Monthly Spend Trend (Last 6 Months)</div>
+        <canvas id="monthlyChart"></canvas>
+    </div>
+
+    <!-- Claim Status (Pie) -->
+    <div class="chart-card">
+        <div class="chart-title">Claims by Status</div>
+        <canvas id="statusChart"></canvas>
+    </div>
+</div>
+
+<script>
+const PALETTE = ["#6366f1","#34d399","#f59e0b","#f87171","#60a5fa","#c084fc","#fb923c","#a3e635"];
+
+// 1. Spend by Category - Doughnut
+const catData = {{ by_category_json | safe }};
+if (catData.length) {
+    new Chart(document.getElementById("categoryChart"), {
+        type: "doughnut",
+        data: {
+            labels: catData.map(d => d.category),
+            datasets: [{ data: catData.map(d => d.total), backgroundColor: PALETTE, borderWidth: 2, borderColor: "rgba(0,0,0,0.3)" }]
+        },
+        options: { plugins: { legend: { labels: { color: "#495057" } } }, cutout: "60%" }
+    });
+} else {
+    document.getElementById("categoryChart").parentElement.innerHTML += "<p style='color: #6c757d;text-align:center;padding:2rem'>No approved spend data yet.</p>";
+    document.getElementById("categoryChart").style.display="none";
+}
+
+// 2. Spend by Department - Horizontal Bar
+const deptData = {{ by_department_json | safe }};
+if (deptData.length) {
+    new Chart(document.getElementById("deptChart"), {
+        type: "bar",
+        data: {
+            labels: deptData.map(d => d.department),
+            datasets: [{ label: "Total (INR)", data: deptData.map(d => d.total), backgroundColor: PALETTE.slice(1), borderRadius: 6 }]
+        },
+        options: {
+            indexAxis: "y",
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: "#495057" }, grid: { color: "#dee2e6" } },
+                y: { ticks: { color: "#495057" }, grid: { display: false } }
+            }
+        }
+    });
+} else {
+    document.getElementById("deptChart").parentElement.innerHTML += "<p style='color: #6c757d;text-align:center;padding:2rem'>No department data yet.</p>";
+    document.getElementById("deptChart").style.display="none";
+}
+
+// 3. Monthly Trend - Line
+const monthData = {{ monthly_json | safe }};
+if (monthData.length) {
+    new Chart(document.getElementById("monthlyChart"), {
+        type: "line",
+        data: {
+            labels: monthData.map(d => d.month),
+            datasets: [{
+                label: "Total Spend (INR)", data: monthData.map(d => d.total),
+                borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,0.1)",
+                tension: 0.4, fill: true, pointBackgroundColor: "#a5b4fc", pointRadius: 4
+            }]
+        },
+        options: {
+            plugins: { legend: { labels: { color: "#495057" } } },
+            scales: {
+                x: { ticks: { color: "#495057" }, grid: { color: "#dee2e6" } },
+                y: { ticks: { color: "#495057" }, grid: { color: "#dee2e6" } }
+            }
+        }
+    });
+} else {
+    document.getElementById("monthlyChart").parentElement.innerHTML += "<p style='color: #6c757d;text-align:center;padding:2rem'>No monthly data yet.</p>";
+    document.getElementById("monthlyChart").style.display="none";
+}
+
+// 4. Status Pie
+const statusData = {{ by_status_json | safe }};
+const STATUS_COLORS = { Draft:"#94a3b8", Submitted:"#f59e0b", Approved:"#60a5fa", Verified:"#34d399", Rejected:"#f87171" };
+if (statusData.length) {
+    new Chart(document.getElementById("statusChart"), {
+        type: "pie",
+        data: {
+            labels: statusData.map(d => d.status + " (" + d.count + ")"),
+            datasets: [{ data: statusData.map(d => d.count), backgroundColor: statusData.map(d => STATUS_COLORS[d.status] || "#6366f1"), borderWidth: 2, borderColor: "rgba(0,0,0,0.3)" }]
+        },
+        options: { plugins: { legend: { labels: { color: "#495057" } } } }
+    });
+} else {
+    document.getElementById("statusChart").parentElement.innerHTML += "<p style='color: #6c757d;text-align:center;padding:2rem'>No status data yet.</p>";
+    document.getElementById("statusChart").style.display="none";
+}
+</script>
+{% endblock %}

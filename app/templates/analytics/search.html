@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/analytics_search.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <h1>Search & Filter Claims</h1>
+    <p>Search by claim title, ID, employee name, status, or category.</p>
+</div>
+
+<div class="search-bar">
+    <form method="GET" action="{{ url_for('analytics.search') }}">
+        <div class="search-row">
+            <div class="field">
+                <label>Claim Title or ID</label>
+                <input type="text" name="q" value="{{ q }}" placeholder="e.g. Business Trip or 42">
+            </div>
+            <div class="field">
+                <label>Employee Name</label>
+                <input type="text" name="employee" value="{{ employee }}" placeholder="e.g. John">
+            </div>
+            <div class="field">
+                <label>Status</label>
+                <select name="status">
+                    <option value="">All Statuses</option>
+                    {% for s in statuses %}
+                    <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label>Category</label>
+                <select name="category">
+                    <option value="">All Categories</option>
+                    {% for c in categories %}
+                    <option value="{{ c }}" {% if category == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn" style="width:100%">Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="results-header">
+    <span class="results-count">{{ total }} result{{ "s" if total != 1 else "" }} found</span>
+    <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-secondary" style="padding:0.4rem 0.9rem; font-size:0.85rem;"><- Analytics Dashboard</a>
+</div>
+
+{% if claims %}
+<div class="glass-card" style="padding:1.5rem;">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Total (INR)</th>
+                <th>Submitted</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for claim in claims %}
+            <tr>
+                <td style="color: #6c757d;">#{{ claim.id }}</td>
+                <td><strong>{{ claim.title }}</strong></td>
+                <td>
+                    {% if claim.employee %}
+                    {{ claim.employee.first_name }} {{ claim.employee.last_name }}
+                    {% else %}-{% endif %}
+                </td>
+                <td style="color: #6c757d;">
+                    {% if claim.employee %}{{ claim.employee.department }}{% else %}-{% endif %}
+                </td>
+                <td><span class="badge badge-{{ claim.status }}">{{ claim.status }}</span></td>
+                <td style="color:#d97706; font-weight:600;">{{ "%.2f"|format(claim.total_amount) }}</td>
+                <td style="color: #6c757d; font-size:0.85rem;">{{ claim.created_at.strftime('%d %b %Y') }}</td>
+                <td>
+                    {% if claim.status in ("Approved", "Verified") %}
+                    <a href="{{ url_for('finance.view_claim', claim_id=claim.id) }}" class="btn" style="padding:0.3rem 0.7rem; font-size:0.8rem;">Finance View</a>
+                    {% elif claim.status == "Submitted" and current_user.role == "Admin" %}
+                    <span style="color: #6c757d; font-size:0.82rem;">Awaiting manager</span>
+                    {% else %}
+                    <span style="color: #6c757d; font-size:0.82rem;">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h4>No Claims Found</h4>
+    <p>Try adjusting your search filters.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/manager_view_expense.css') }}">
+{% endblock %}
+
+<a href="{{ url_for('manager.dashboard') }}" class="back-link"><- Back to Approvals Dashboard</a>
+
+<div class="glass-card">
+    <div class="detail-header">
+        <div>
+            <h2>Review Expense Claim: {{ claim.title }}</h2>
+            <p>Submitted by {{ claim.employee.first_name }} {{ claim.employee.last_name }} on {{ claim.created_at.strftime('%d %b %Y') }}</p>
+        </div>
+        <span class="badge" style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; color: #d97706; border: 1px solid #fbbf24; padding: 0.3rem 0.85rem; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">Pending Review</span>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <label>Total Claimed Amount</label>
+            <p style="color: #28a745; font-size: 1.4rem;">INR {{ "%.2f"|format(claim.total_amount) }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Linked Travel Request</label>
+            <p>
+                {% if claim.travel_request %}
+                <a href="{{ url_for('travel.view_request', request_id=claim.travel_request.id) }}" style="color: var(--accent-color); text-decoration: none;">
+                    TR #{{ claim.travel_request.id }} to {{ claim.travel_request.destination }}
+                </a>
+                {% else %}
+                <span style="color: #6c757d">None (Standalone)</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="detail-item" style="grid-column: span 2;">
+            <label>Purpose / Description</label>
+            <p>{{ claim.description or 'No comments provided.' }}</p>
+        </div>
+    </div>
+
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; border-left: 3px solid var(--accent-color); padding-left: 0.5rem;">Line Items Details</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount (INR)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in claim.items.all() %}
+            <tr>
+                <td>{{ item.expense_date.strftime('%d %b %Y') }}</td>
+                <td><strong>{{ item.category }}</strong></td>
+                <td style="color: #6c757d">{{ item.description or '-' }}</td>
+                <td><strong>{{ "%.2f"|format(item.amount) }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; border-left: 3px solid var(--accent-color); padding-left: 0.5rem;">Attached Receipts</h3>
+    {% if claim.receipts.count() > 0 %}
+    <div class="receipt-list">
+        {% for receipt in claim.receipts.all() %}
+        <div class="receipt-item">
+            <div>
+                <a href="{{ url_for('static', filename='uploads/' + receipt.filename) }}" target="_blank">
+                    📄 {{ receipt.filename }}
+                </a>
+                <span style="color: #6c757d; font-size: 0.75rem; margin-left: 0.5rem;">
+                    ({{ (receipt.file_size / 1024)|round(1) }} KB)
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #6c757d; font-style: italic; margin-bottom: 2rem;">No receipt files attached.</p>
+    {% endif %}
+
+    <hr class="divider">
+
+    <h3 style="font-size: 1.2rem; margin-bottom: 1rem;">Action Panel</h3>
+    <form method="POST" action="{{ url_for('manager.approve_expense', claim_id=claim.id) }}">
+        <div style="margin-bottom: 1.5rem;">
+            <label for="comments" style="display:block; margin-bottom: 0.5rem; color: #6c757d;">Approver Comments / Review Feedback</label>
+            <textarea id="comments" name="comments" class="form-control" placeholder="Write feedback or reason for approval/rejection here..."></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 1.5rem;">
+            <button type="submit" name="action" value="Approved" class="btn" style="flex: 1; padding: 0.8rem; background: var(--success); font-size: 1rem;">Approve Claim</button>
+            <button type="submit" name="action" value="Rejected" class="btn" style="flex: 1; padding: 0.8rem; background: var(--danger); font-size: 1rem;">Reject Claim</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

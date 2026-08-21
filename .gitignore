@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment Variables
+.env
+
+# Flask & SQLite Database
+instance/
+*.db
+
+# IDE settings
+.idea/
+.vscode/
+.gemini/
+
+phase*.md
+phases.txt
+rbac.md
+report.md
+tests.md
+templates.md
+wholeexplanation.md
+test_analytics.py
+test_finance.py
+test_manager.py
+flask11.md
+jwt.md
+explanation.md

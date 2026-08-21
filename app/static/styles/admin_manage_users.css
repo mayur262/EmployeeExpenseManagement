@@ -1,0 +1,19 @@
+.page-header { margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1.2rem; }
+.page-header h1 { font-size: 1.8rem; }
+.page-header p { color: #6c757d; margin-top: 0.3rem; }
+.actions-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+thead th { text-align: left; padding: 0.8rem 1rem; color: #6c757d; font-weight: 600; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.06em; border-bottom: 1px solid var(--glass-border); }
+tbody tr { border-bottom: 1px solid var(--glass-border); transition: background 0.2s; }
+tbody tr:hover { background: #f8f9fa; }
+tbody td { padding: 0.9rem 1rem; vertical-align: middle; }
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.72rem; font-weight: 600; }
+.badge-active { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; color: #28a745; border: 1px solid #10b981; }
+.badge-inactive { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; color: #dc3545; border: 1px solid #ef4444; }
+.role-chip { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.72rem; font-weight: 600; background: #e8eaf6; color: #1a237e; border: 1px solid #c5cae9; color: #0056b3; border: 1px solid #6366f1; }
+.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+.btn-danger { background: #dc3545; }
+.btn-danger:hover { background: #ef4444; }
+.btn-warn { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; color: #f59e0b; border: 1px solid #f59e0b; }
+.btn-warn:hover { background: #ffeeba; color: #856404; border: 1px solid #ffeeba; }

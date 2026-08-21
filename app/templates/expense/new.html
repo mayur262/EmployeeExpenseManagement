@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/expense_new.css') }}">
+{% endblock %}
+
+<a href="{{ url_for('expense.list_claims') }}" class="back-link"><- Back to Expense Claims</a>
+
+<div class="glass-card form-container">
+    <div class="form-header">
+        <h2>Create Expense Claim</h2>
+        <p>Initialize a new claim container. You can add line items and upload receipts after creation.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('expense.new_claim') }}">
+        <div class="form-group">
+            <label for="title">Claim Title / Reference</label>
+            <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Q3 Sales Trip Mumbai" required>
+        </div>
+
+        <div class="form-group">
+            <label for="travel_request_id">Link to Travel Request (Optional)</label>
+            <select id="travel_request_id" name="travel_request_id" class="form-control">
+                <option value="">-- Standalone (No Travel Request) --</option>
+                {% for tr in travel_requests %}
+                <option value="{{ tr.id }}">
+                    TR #{{ tr.id }} to {{ tr.destination }} ({{ tr.status }})
+                </option>
+                {% endfor %}
+            </select>
+            <p class="hint">Select a travel request if these expenses were incurred during a pre-approved business trip.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="description">General Comments / Purpose</label>
+            <textarea id="description" name="description" class="form-control" placeholder="Briefly describe the business activities or reason for this claim..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button type="submit" class="btn" style="flex: 1; padding: 0.8rem; font-size: 1rem;">Create Claim Draft</button>
+            <a href="{{ url_for('expense.list_claims') }}" class="btn btn-secondary" style="flex: 1; padding: 0.8rem; font-size: 1rem; text-align: center;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

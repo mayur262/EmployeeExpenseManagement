@@ -1,0 +1,27 @@
+.page-header { margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1.2rem; }
+.page-header h1 { font-size: 2rem; }
+.page-header p { color: #6c757d; margin-top: 0.3rem; }
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+.stat-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 4px;
+    padding: 1.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: transform 0.2s;
+}
+.stat-card:hover { transform: translateY(-2px); }
+.stat-card .stat-label { font-size: 0.78rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.stat-card .stat-value { font-size: 2rem; font-weight: 700; }
+.stat-card .stat-link { font-size: 0.85rem; color: var(--accent-color); text-decoration: none; margin-top: 0.5rem; }
+.stat-card .stat-link:hover { text-decoration: underline; }
+
+.quick-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/expense_list.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <div>
+        <h1>Expense Claims</h1>
+        <p>Manage and track all business expense reports</p>
+    </div>
+    {% if current_user.role == 'Employee' %}
+    <a href="{{ url_for('expense.new_claim') }}" class="btn">+ Create Claim</a>
+    {% endif %}
+</div>
+
+<div class="glass-card">
+    {% if claims %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Linked Travel Request</th>
+                    <th>Total Amount (INR)</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for claim in claims %}
+                <tr>
+                    <td style="color: #6c757d">{{ claim.id }}</td>
+                    <td><strong>{{ claim.title }}</strong></td>
+                    <td>
+                        {% if claim.travel_request %}
+                        <a href="{{ url_for('travel.view_request', request_id=claim.travel_request.id) }}" class="link-btn">
+                            TR #{{ claim.travel_request.id }} to {{ claim.travel_request.destination }}
+                        </a>
+                        {% else %}
+                        <span style="color: #6c757d">None (Standalone)</span>
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ "%.2f"|format(claim.total_amount) }}</strong></td>
+                    <td>
+                        <span class="badge badge-{{ claim.status.lower() }}">{{ claim.status }}</span>
+                    </td>
+                    <td>{{ claim.created_at.strftime('%d %b %Y') }}</td>
+                    <td>
+                        <a href="{{ url_for('expense.view_claim', claim_id=claim.id) }}" class="link-btn">View Details -></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>No Expense Claims Found</h3>
+        <p>Create a claim to submit your business expenses for approval.</p>
+        {% if current_user.role == 'Employee' %}
+        <a href="{{ url_for('expense.new_claim') }}" class="btn" style="margin-top: 1.5rem; display: inline-block;">+ Create Claim</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

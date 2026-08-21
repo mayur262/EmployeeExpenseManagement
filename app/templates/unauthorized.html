@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/unauthorized.css') }}">
+{% endblock %}
+
+<div class="glass-card error-container">
+    <div class="error-code">403</div>
+    <h2 class="error-title">Access Denied</h2>
+    <p class="error-message">You do not have the necessary permissions or the correct role to view this page.</p>
+    <a href="{{ url_for('auth.home') }}" class="btn">Return Dashboard</a>
+</div>
+{% endblock %}

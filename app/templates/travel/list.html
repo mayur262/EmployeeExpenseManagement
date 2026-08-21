@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>My Travel Requests</h1>
+        <p>Track all your business travel submissions</p>
+    </div>
+    {% if current_user.role == 'Employee' %}
+    <a href="{{ url_for('travel.new_request') }}" class="btn">+ New Request</a>
+    {% endif %}
+</div>
+
+<div class="glass-card">
+    {% if requests %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Destination</th>
+                    <th>Purpose</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Budget (INR)</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>{{ req.id }}</td>
+                    <td><strong>{{ req.destination }}</strong></td>
+                    <td>{{ req.purpose[:50] }}{% if req.purpose|length > 50 %}...{% endif %}</td>
+                    <td>{{ req.start_date.strftime('%d %b %Y') }}</td>
+                    <td>{{ req.end_date.strftime('%d %b %Y') }}</td>
+                    <td>{{ "%.2f"|format(req.estimated_budget) }}</td>
+                    <td>
+                        <span class="badge badge-{{ req.status.lower() }}">{{ req.status }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('travel.view_request', request_id=req.id) }}" class="link-btn">View -></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>No Travel Requests Yet</h3>
+        <p>Submit your first request to get started</p>
+        {% if current_user.role == 'Employee' %}
+        <a href="{{ url_for('travel.new_request') }}" class="btn">+ Submit Request</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

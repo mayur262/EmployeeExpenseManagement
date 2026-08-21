@@ -1,0 +1,14 @@
+.page-header { margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1.2rem; }
+.page-header h1 { font-size: 2rem; }
+.page-header p { color: #6c757d; margin-top: 0.3rem; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
+.kpi-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 4px; padding: 1.5rem; transition: transform 0.2s; }
+.kpi-card:hover { transform: translateY(-2px); }
+.kpi-label { font-size: 0.72rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; }
+.kpi-value { font-size: 1.9rem; font-weight: 700; margin-top: 0.4rem; }
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.chart-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 4px; padding: 1.5rem; }
+.chart-title { font-size: 0.8rem; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1.2rem; }
+canvas { max-height: 280px; }
+.nav-links { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+@media(max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }

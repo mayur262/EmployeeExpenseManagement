@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/admin_manage_users.css') }}">
+{% endblock %}
+
+<div class="page-header">
+    <h1>User Management</h1>
+    <p>View, edit roles, activate/deactivate, or remove users.</p>
+</div>
+<div class="actions-bar">
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary btn-sm">&larr; Back to Admin</a>
+</div>
+
+<div class="glass-card" style="padding: 1.5rem;">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Employee Name</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td style="color: #6c757d;">{{ user.id }}</td>
+                    <td><strong>{{ user.email }}</strong></td>
+                    <td><span class="role-chip">{{ user.role }}</span></td>
+                    <td>
+                        {% if user.is_active %}
+                        <span class="badge badge-active">Active</span>
+                        {% else %}
+                        <span class="badge badge-inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.employee %}
+                        {{ user.employee.first_name }} {{ user.employee.last_name }}
+                        {% else %}
+                        <span style="color: #6c757d;">-</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: #6c757d;">
+                        {% if user.employee %}{{ user.employee.department }}{% else %}-{% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-sm" style="padding:0.3rem 0.7rem; font-size:0.8rem;">Edit Role</a>
+                            <form method="POST" action="{{ url_for('admin.toggle_user', user_id=user.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-warn btn-sm">
+                                    {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display:inline;" onsubmit="return confirm('Permanently delete this user and all their data?');">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

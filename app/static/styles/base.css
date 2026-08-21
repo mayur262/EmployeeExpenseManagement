@@ -1,0 +1,268 @@
+:root {
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --accent-color: #0056b3;
+    --accent-hover: #004085;
+    --text-main: #333333;
+    --text-muted: #666666;
+    --glass-bg: #ffffff;
+    --glass-border: #cccccc;
+    --success: #28a745;
+    --danger: #dc3545;
+    --info: #17a2b8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+header {
+    background: #ffffff;
+    border-bottom: 1px solid #cccccc;
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+nav {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+nav a:hover {
+    color: var(--text-main);
+}
+
+.btn {
+    background: var(--accent-color);
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    border: 1px solid var(--accent-color);
+    cursor: pointer;
+    display: inline-block;
+}
+
+.btn:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    background: #f8f9fa;
+}
+
+main {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.alerts {
+    margin-bottom: 1.5rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.alert-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+.glass-card {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    border-radius: 4px !important;
+    padding: 2.5rem !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: none !important;
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border-top: 1px solid #cccccc;
+    background: #ffffff;
+    margin-top: auto;
+}
+
+/* Forms & Inputs overrides */
+.form-control, input, select, textarea {
+    background-color: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    color: #333333 !important;
+    border-radius: 4px !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.95rem !important;
+}
+.form-control:focus, input:focus, select:focus, textarea:focus {
+    border-color: var(--accent-color) !important;
+    outline: 0 !important;
+}
+
+/* Stat cards in admin/finance dashboard */
+.stat-card {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    border-radius: 4px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    padding: 1.25rem !important;
+    transform: none !important;
+    transition: none !important;
+}
+.stat-card:hover {
+    transform: none !important;
+}
+.stat-card .stat-value {
+    color: var(--accent-color) !important;
+    font-size: 1.75rem !important;
+}
+
+/* Table design */
+table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: 1rem !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cccccc !important;
+}
+table th, table td {
+    padding: 0.75rem !important;
+    vertical-align: top !important;
+    border-top: 1px solid #cccccc !important;
+    color: #333333 !important;
+}
+table thead th {
+    vertical-align: bottom !important;
+    border-bottom: 2px solid #cccccc !important;
+    background-color: #f8f9fa !important;
+    color: #333333 !important;
+    text-transform: none !important;
+    font-weight: bold !important;
+    letter-spacing: normal !important;
+    font-size: 0.9rem !important;
+}
+table tbody tr {
+    border-bottom: 1px solid #cccccc !important;
+    transition: none !important;
+}
+table tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Badges */
+.badge {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    border-radius: 0.25rem !important;
+    display: inline-block !important;
+    text-transform: uppercase !important;
+    letter-spacing: normal !important;
+}
+.badge-pending, .badge-Submitted {
+    background-color: #fff3cd !important;
+    color: #856404 !important;
+    border: 1px solid #ffeeba !important;
+}
+.badge-approved, .badge-Approved, .badge-active {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+    border: 1px solid #c3e6cb !important;
+}
+.badge-rejected, .badge-Rejected, .badge-inactive {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+    border: 1px solid #f5c6cb !important;
+}
+.badge-Verified {
+    background-color: #cce5ff !important;
+    color: #004085 !important;
+    border: 1px solid #b8daff !important;
+}
+.badge-Draft {
+    background-color: #e2e3e5 !important;
+    color: #383d41 !important;
+    border: 1px solid #d6d8db !important;
+}
+.role-chip {
+    background-color: #e8eaf6 !important;
+    color: #1a237e !important;
+    border: 1px solid #c5cae9 !important;
+    border-radius: 4px !important;
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    display: inline-block !important;
+}
+.link-btn {
+    color: var(--accent-color) !important;
+    text-decoration: none !important;
+}
+.link-btn:hover {
+    color: var(--accent-hover) !important;
+    text-decoration: underline !important;
+}
