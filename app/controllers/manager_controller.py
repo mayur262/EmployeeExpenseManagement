@@ -10,6 +10,9 @@ from app.db import db
 
 manager_bp = Blueprint('manager', __name__, url_prefix='/manager')
 
+def _page_number(name):
+    return max(request.args.get(name, 1, type=int), 1)
+
 @manager_bp.route('/')
 @login_required
 @role_required('Manager')
@@ -19,8 +22,8 @@ def dashboard():
         flash('Manager profile not found.', 'danger')
         return redirect(url_for('auth.home'))
         
-    pending_travel = TravelDAO.get_pending_by_manager_id(employee.id)
-    pending_expenses = ExpenseClaimDAO.get_pending_by_manager_id(employee.id)
+    pending_travel = TravelDAO.get_pending_by_manager_id(employee.id, page=_page_number('travel_page'))
+    pending_expenses = ExpenseClaimDAO.get_pending_by_manager_id(employee.id, page=_page_number('expense_page'))
     
     return render_template(
         'manager/dashboard.html',
@@ -54,7 +57,7 @@ def approve_travel(request_id):
     if not manager_employee or req.employee.manager_id != manager_employee.id:
         abort(403)
         
-    action = request.form.get('action') # 'Approved' or 'Rejected'
+    action = request.form.get('action') 
     comments = request.form.get('comments')
     
     if action not in ['Approved', 'Rejected']:
@@ -100,7 +103,7 @@ def approve_expense(claim_id):
     if not manager_employee or claim.employee.manager_id != manager_employee.id:
         abort(403)
         
-    action = request.form.get('action') # 'Approved' or 'Rejected'
+    action = request.form.get('action') 
     comments = request.form.get('comments')
     
     if action not in ['Approved', 'Rejected']:

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% from '_pagination.html' import render_pagination %}
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/finance_dashboard.css') }}">
 {% endblock %}
@@ -11,9 +12,9 @@
 </div>
 
 <!-- Summary Stats -->
-{% set approved_count = claims | selectattr('status', 'equalto', 'Approved') | list | length %}
-{% set verified_count = claims | selectattr('status', 'equalto', 'Verified') | list | length %}
-{% set total_amount = claims | sum(attribute='total_amount') %}
+{% set approved_count = claims.items | selectattr('status', 'equalto', 'Approved') | list | length %}
+{% set verified_count = claims.items | selectattr('status', 'equalto', 'Verified') | list | length %}
+{% set total_amount = claims.items | sum(attribute='total_amount') %}
 
 <div class="summary-bar">
     <div class="stat-card">
@@ -40,7 +41,7 @@
 
 <!-- Claims Table -->
 <div class="glass-card" style="padding: 1.5rem;">
-    {% if claims %}
+    {% if claims.items %}
     <div class="table-wrap">
         <table>
             <thead>
@@ -56,7 +57,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for claim in claims %}
+                {% for claim in claims.items %}
                 <tr>
                     <td style="color: #6c757d;">{{ claim.id }}</td>
                     <td>
@@ -91,5 +92,6 @@
         <p>No expense claims match the current filter. Claims appear here once a manager approves them.</p>
     </div>
     {% endif %}
+    {{ render_pagination(claims, 'finance.dashboard', {'status': current_filter if current_filter != 'All' else None}) }}
 </div>
 {% endblock %}

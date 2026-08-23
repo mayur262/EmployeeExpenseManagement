@@ -7,6 +7,9 @@ from datetime import date
 
 travel_bp = Blueprint('travel', __name__, url_prefix='/travel')
 
+def _page_number():
+    return max(request.args.get('page', 1, type=int), 1)
+
 @travel_bp.route('/')
 @login_required
 def list_requests():
@@ -16,7 +19,7 @@ def list_requests():
     if not employee:
         flash('Employee profile not found. Contact admin.', 'danger')
         return redirect(url_for('auth.home'))
-    requests = TravelDAO.get_by_employee_id(employee.id)
+    requests = TravelDAO.get_by_employee_id(employee.id, page=_page_number())
     return render_template('travel/list.html', requests=requests)
 
 @travel_bp.route('/new', methods=['GET', 'POST'])

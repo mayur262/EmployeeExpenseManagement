@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% from '_pagination.html' import render_pagination %}
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/expense_list.css') }}">
 {% endblock %}
@@ -16,7 +17,7 @@
 </div>
 
 <div class="glass-card">
-    {% if claims %}
+    {% if claims.items %}
     <div class="table-wrap">
         <table>
             <thead>
@@ -31,7 +32,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for claim in claims %}
+                {% for claim in claims.items %}
                 <tr>
                     <td style="color: #6c757d">{{ claim.id }}</td>
                     <td><strong>{{ claim.title }}</strong></td>
@@ -66,5 +67,6 @@
         {% endif %}
     </div>
     {% endif %}
+    {{ render_pagination(claims, 'expense.list_claims') }}
 </div>
 {% endblock %}

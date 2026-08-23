@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{% from '_pagination.html' import render_pagination %}
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/admin_manage_policies.css') }}">
 {% endblock %}
@@ -26,7 +27,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for policy in policies %}
+            {% for policy in policies.items %}
             <tr>
                 <td style="color: #6c757d;">{{ policy.id }}</td>
                 <td><strong>{{ policy.category }}</strong></td>
@@ -53,5 +54,6 @@
         <a href="{{ url_for('admin.new_policy') }}" class="btn" style="margin-top:1rem;">+ New Policy</a>
     </div>
     {% endif %}
+    {{ render_pagination(policies, 'admin.manage_policies') }}
 </div>
 {% endblock %}

@@ -36,7 +36,11 @@ class AnalyticsService:
             .all()
         )
         return [
-            {"status": r.status, "count": int(r.count), "total": float(r.total or 0)}
+            {
+                "status": r.status,
+                "count": int(r.count),
+                "total": float(r.total or 0)
+            }
             for r in rows
         ]
 
@@ -53,25 +57,46 @@ class AnalyticsService:
             .order_by(func.sum(ExpenseClaim.total_amount).desc())
             .all()
         )
-        return [{"department": r.department, "total": float(r.total or 0)} for r in rows]
+        return [
+            {
+                "department": r.department,
+                "total": float(r.total or 0)
+            }
+            for r in rows
+        ]
 
     @staticmethod
     def monthly_spend_trend(months=6):
         cutoff = datetime.now(timezone.utc) - timedelta(days=months * 30)
+
+        month_expr = func.date_format(
+            ExpenseClaim.created_at,
+            "%Y-%m"
+        )
+
         rows = (
             db.session.query(
-                func.strftime("%Y-%m", ExpenseClaim.created_at).label("month"),
+                month_expr.label("month"),
                 func.sum(ExpenseClaim.total_amount).label("total")
             )
             .filter(
-                ExpenseClaim.status.in_(["Submitted", "Approved", "Verified"]),
+                ExpenseClaim.status.in_(
+                    ["Submitted", "Approved", "Verified"]
+                ),
                 ExpenseClaim.created_at >= cutoff
             )
-            .group_by(func.strftime("%Y-%m", ExpenseClaim.created_at))
-            .order_by(func.strftime("%Y-%m", ExpenseClaim.created_at))
+            .group_by(month_expr)
+            .order_by(month_expr)
             .all()
         )
-        return [{"month": r.month, "total": float(r.total or 0)} for r in rows]
+
+        return [
+            {
+                "month": r.month,
+                "total": float(r.total or 0)
+            }
+            for r in rows
+        ]
 
     @staticmethod
     def summary_stats():
@@ -84,57 +109,100 @@ class AnalyticsService:
             .group_by(ExpenseClaim.status)
             .all()
         )
+
         stats = {
             "total_claims": 0,
             "total_spend": 0.0,
-            "Draft": 0, "Submitted": 0, "Approved": 0,
-            "Verified": 0, "Rejected": 0
+            "Draft": 0,
+            "Submitted": 0,
+            "Approved": 0,
+            "Verified": 0,
+            "Rejected": 0
         }
+
         for r in rows:
             stats["total_claims"] += int(r.cnt)
             stats["total_spend"] += float(r.amt or 0)
             stats[r.status] = int(r.cnt)
 
-        travel_total = db.session.query(func.count(TravelRequest.id)).scalar() or 0
+        travel_total = (
+            db.session.query(
+                func.count(TravelRequest.id)
+            ).scalar() or 0
+        )
+
         stats["total_travel_requests"] = travel_total
+
         return stats
 
-
-
     @staticmethod
-    def search_claims(query_str=None, status=None, category=None, employee_name=None):
+    def search_claims(
+        query_str=None,
+        status=None,
+        category=None,
+        employee_name=None
+    ):
         q = db.session.query(ExpenseClaim).join(
-            Employee, Employee.id == ExpenseClaim.employee_id
+            Employee,
+            Employee.id == ExpenseClaim.employee_id
         )
 
         if query_str:
             try:
                 claim_id = int(query_str)
+
                 q = q.filter(
                     db.or_(
-                        ExpenseClaim.title.ilike(f"%{query_str}%"),
+                        ExpenseClaim.title.ilike(
+                            f"%{query_str}%"
+                        ),
                         ExpenseClaim.id == claim_id
                     )
                 )
+
             except (ValueError, TypeError):
-                q = q.filter(ExpenseClaim.title.ilike(f"%{query_str}%"))
+                q = q.filter(
+                    ExpenseClaim.title.ilike(
+                        f"%{query_str}%"
+                    )
+                )
 
         if status:
-            q = q.filter(ExpenseClaim.status == status)
+            q = q.filter(
+                ExpenseClaim.status == status
+            )
 
         if employee_name:
             q = q.filter(
                 db.or_(
-                    Employee.first_name.ilike(f"%{employee_name}%"),
-                    Employee.last_name.ilike(f"%{employee_name}%"),
-                    func.concat(Employee.first_name, " ", Employee.last_name).ilike(f"%{employee_name}%")
+                    Employee.first_name.ilike(
+                        f"%{employee_name}%"
+                    ),
+                    Employee.last_name.ilike(
+                        f"%{employee_name}%"
+                    ),
+                    func.concat(
+                        Employee.first_name,
+                        " ",
+                        Employee.last_name
+                    ).ilike(
+                        f"%{employee_name}%"
+                    )
                 )
             )
 
         if category:
-            q = q.join(ExpenseItem, ExpenseItem.expense_claim_id == ExpenseClaim.id).filter(
-                ExpenseItem.category == category
-            ).distinct()
+            q = (
+                q.join(
+                    ExpenseItem,
+                    ExpenseItem.expense_claim_id == ExpenseClaim.id
+                )
+                .filter(
+                    ExpenseItem.category == category
+                )
+                .distinct()
+            )
 
-        return q.order_by(ExpenseClaim.created_at.desc()).all()
-
+        return q.order_by(
+            ExpenseClaim.created_at.desc()
+        ).all()

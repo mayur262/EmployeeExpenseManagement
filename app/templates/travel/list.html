@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% from '_pagination.html' import render_pagination %}
 
 <div class="page-header">
     <div>
@@ -13,7 +14,7 @@
 </div>
 
 <div class="glass-card">
-    {% if requests %}
+    {% if requests.items %}
     <div class="table-wrap">
         <table>
             <thead>
@@ -29,7 +30,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for req in requests %}
+                {% for req in requests.items %}
                 <tr>
                     <td>{{ req.id }}</td>
                     <td><strong>{{ req.destination }}</strong></td>
@@ -57,5 +58,6 @@
         {% endif %}
     </div>
     {% endif %}
+    {{ render_pagination(requests, 'travel.list_requests') }}
 </div>
 {% endblock %}

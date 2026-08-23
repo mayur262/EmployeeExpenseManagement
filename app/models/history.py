@@ -5,10 +5,10 @@ class ApprovalHistory(db.Model):
     __tablename__ = 'approval_history'
     
     id = db.Column(db.Integer, primary_key=True)
-    request_type = db.Column(db.String(20), nullable=False) # 'Travel' or 'Expense'
-    request_id = db.Column(db.Integer, nullable=False) # ID of travel_request or expense_claim
+    request_type = db.Column(db.String(20), nullable=False) 
+    request_id = db.Column(db.Integer, nullable=False) 
     approver_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    action = db.Column(db.String(20), nullable=False) # Approved, Rejected, Verified
+    action = db.Column(db.String(20), nullable=False) 
     comments = db.Column(db.Text, nullable=True)
     action_date = db.Column(db.DateTime, default=datetime.utcnow)
     

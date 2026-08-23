@@ -19,7 +19,7 @@ def app():
 def init_db(app):
     with app.app_context():
         db.create_all()
-        # Seed employee and manager
+        
         AuthService.register_user(
             email='emp@company.com', password='password123', role='Employee',
             first_name='John', last_name='Doe', department='Sales', designation='Rep'
@@ -37,7 +37,7 @@ def login_client(client, email, password):
 def test_create_and_manage_expense_claim(app, init_db, client):
     login_client(client, 'emp@company.com', 'password123')
     
-    # 1. Create a claim via POST
+    
     response = client.post('/expense/new', data={
         'title': 'Trip to Mumbai Office',
         'description': 'Meetings with client partners',
@@ -48,7 +48,7 @@ def test_create_and_manage_expense_claim(app, init_db, client):
     assert b"Expense claim created successfully" in response.data
     assert b"Trip to Mumbai Office" in response.data
 
-    # Fetch claim to get its id
+   
     with app.app_context():
         employee = EmployeeDAO.get_by_user_id(1)
         claims = ExpenseClaimDAO.get_by_employee_id(employee.id)
@@ -57,7 +57,7 @@ def test_create_and_manage_expense_claim(app, init_db, client):
         assert claims[0].status == 'Draft'
         assert float(claims[0].total_amount) == 0.00
 
-    # 2. Add an expense item line
+    
     response = client.post(f'/expense/{claim_id}/item', data={
         'category': 'Meals',
         'amount': '1500.50',
@@ -73,7 +73,6 @@ def test_create_and_manage_expense_claim(app, init_db, client):
         claims = ExpenseClaimDAO.get_by_employee_id(employee.id)
         assert float(claims[0].total_amount) == 1500.50
 
-    # 3. Simulate file upload of a valid receipt (PDF)
     data = {
         'receipt_file': (BytesIO(b"dummy pdf receipt content"), 'invoice.pdf')
     }
@@ -82,15 +81,15 @@ def test_create_and_manage_expense_claim(app, init_db, client):
     assert b"Receipt uploaded successfully" in response.data
     assert b"invoice.pdf" in response.data
 
-    # 4. Simulate file upload of an invalid receipt type (.txt)
+    
     data_invalid = {
         'receipt_file': (BytesIO(b"dummy text content"), 'receipt.txt')
     }
     response = client.post(f'/expense/{claim_id}/receipt', data=data_invalid, content_type='multipart/form-data', follow_redirects=True)
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert b"Invalid file type" in response.data
 
-    # 5. Submit the claim
+    
     response = client.post(f'/expense/{claim_id}/submit', follow_redirects=True)
     assert response.status_code == 200
     assert b"Expense claim submitted successfully for approval" in response.data
@@ -99,7 +98,7 @@ def test_create_and_manage_expense_claim(app, init_db, client):
         claims = ExpenseClaimDAO.get_by_employee_id(employee.id)
         assert claims[0].status == 'Submitted'
 
-    # 6. Try adding item to a submitted claim (should fail/redirect/prevent)
+    
     response = client.post(f'/expense/{claim_id}/item', data={
         'category': 'Flight',
         'amount': '5000.00',

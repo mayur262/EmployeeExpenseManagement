@@ -15,7 +15,7 @@ class AuthService:
         
 
         db.session.add(new_user)
-        db.session.flush() # populated user.id
+        db.session.flush() 
         
         new_employee = Employee(
             user_id=new_user.id,

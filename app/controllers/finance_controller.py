@@ -7,6 +7,9 @@ from app.services.expense_service import ExpenseService
 
 finance_bp = Blueprint('finance', __name__, url_prefix='/finance')
 
+def _page_number():
+    return max(request.args.get('page', 1, type=int), 1)
+
 
 @finance_bp.route('/')
 @login_required
@@ -17,7 +20,7 @@ def dashboard():
     if status_filter not in (None, 'Approved', 'Verified'):
         status_filter = None
 
-    claims = ExpenseClaimDAO.get_all_for_finance(status_filter=status_filter)
+    claims = ExpenseClaimDAO.get_all_for_finance(status_filter=status_filter, page=_page_number())
 
     return render_template(
         'finance/dashboard.html',

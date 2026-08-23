@@ -8,6 +8,9 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 CATEGORIES = ["Accommodation", "Transportation", "Meals", "Flight", "Other"]
 ROLES = ["Employee", "Manager", "Finance", "Admin"]
 
+def _page_number():
+    return max(request.args.get('page', 1, type=int), 1)
+
 
 @admin_bp.route("/")
 @login_required
@@ -28,7 +31,7 @@ def dashboard():
 @login_required
 @role_required("Admin")
 def manage_users():
-    users = AdminService.get_all_users()
+    users = AdminService.get_all_users(page=_page_number())
     return render_template("admin/manage_users.html", users=users)
 
 
@@ -89,7 +92,7 @@ def delete_user(user_id):
 @login_required
 @role_required("Admin")
 def manage_policies():
-    policies = AdminService.get_all_policies()
+    policies = AdminService.get_all_policies(page=_page_number())
     return render_template("admin/manage_policies.html", policies=policies)
 
 

@@ -16,6 +16,12 @@ ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def _page_number():
+    try:
+        return max(request.args.get('page', 1, type=int), 1)
+    except (TypeError, ValueError):
+        return 1
+
 @expense_bp.route('/')
 @login_required
 def list_claims():
@@ -24,11 +30,11 @@ def list_claims():
         flash('Employee profile not found.', 'danger')
         return redirect(url_for('auth.home'))
     
+    page = _page_number()
     if current_user.role == 'Employee':
-        claims = ExpenseClaimDAO.get_by_employee_id(employee.id)
+        claims = ExpenseClaimDAO.get_by_employee_id(employee.id, page=page)
     else:
-
-        claims = ExpenseClaimDAO.get_all()
+        claims = ExpenseClaimDAO.get_all(page=page)
         
     return render_template('expense/list.html', claims=claims)
 

@@ -9,8 +9,8 @@ class AdminService:
 
 
     @staticmethod
-    def get_all_users():
-        return UserDAO.get_all()
+    def get_all_users(page=None, per_page=10):
+        return UserDAO.get_all(page=page, per_page=per_page)
 
     @staticmethod
     def get_user_by_id(user_id):
@@ -47,8 +47,8 @@ class AdminService:
 
 
     @staticmethod
-    def get_all_policies():
-        return ExpensePolicyDAO.get_all()
+    def get_all_policies(page=None, per_page=10):
+        return ExpensePolicyDAO.get_all(page=page, per_page=per_page)
 
     @staticmethod
     def get_policy_by_id(policy_id):

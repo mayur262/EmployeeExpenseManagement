@@ -8,8 +8,11 @@ class BaseDAO:
         return db.session.get(cls.model, entity_id)
 
     @classmethod
-    def get_all(cls):
-        return cls.model.query.all()
+    def get_all(cls, page=None, per_page=10):
+        query = cls.model.query
+        if page is None:
+            return query.all()
+        return query.paginate(page=page, per_page=per_page, error_out=False)
 
     @classmethod
     def save(cls, entity):

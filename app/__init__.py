@@ -54,9 +54,9 @@ def create_app(config_class=Config):
     if app.config.get("USE_MYSQL") and not app.config.get("TESTING"):
         import pymysql
         conn = pymysql.connect(
-            host=app.config.get("DB_HOST", "localhost"),
-            user=app.config.get("DB_USER", "root"),
-            password=app.config.get("DB_PASSWORD", "")
+            host=app.config.get("DB_HOST"),
+            user=app.config.get("DB_USER"),
+            password=app.config.get("DB_PASSWORD")
         )
         try:
             with conn.cursor() as cursor:
@@ -89,6 +89,7 @@ def create_app(config_class=Config):
     from app.controllers.finance_controller import finance_bp
     from app.controllers.admin_controller import admin_bp
     from app.controllers.analytics_controller import analytics_bp
+    from app.openapi import openapi_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(travel_bp)
@@ -97,6 +98,7 @@ def create_app(config_class=Config):
     app.register_blueprint(finance_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(analytics_bp)
+    app.register_blueprint(openapi_bp)
 
 
     with app.app_context():

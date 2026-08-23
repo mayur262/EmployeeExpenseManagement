@@ -11,7 +11,7 @@ class TravelRequest(db.Model):
     end_date = db.Column(db.Date, nullable=False)
     purpose = db.Column(db.Text, nullable=False)
     estimated_budget = db.Column(db.Numeric(10, 2), nullable=False)
-    status = db.Column(db.String(20), nullable=False, default='Pending') # Pending, Approved, Rejected
+    status = db.Column(db.String(20), nullable=False, default='Pending') 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     expense_claims = db.relationship('ExpenseClaim', backref='travel_request', lazy='dynamic')

@@ -16,13 +16,13 @@ def client(app):
 @pytest.fixture
 def init_db(app):
     with app.app_context():
-        # Tables are already created in create_app()
+       
         yield db
         db.session.remove()
         db.drop_all()
 
 def test_registration_and_login(app, init_db, client):
-    # Test sign-up
+    
     response = client.post('/register', data={
         'email': 'jane@company.com',
         'password': 'SecurePassword123',
@@ -37,7 +37,7 @@ def test_registration_and_login(app, init_db, client):
     
     assert b"Registration successful! Please log in." in response.data
 
-    # Test login - employee is redirected to travel list page
+ 
     response = client.post('/login', data={
         'email': 'jane@company.com',
         'password': 'SecurePassword123'
@@ -47,7 +47,7 @@ def test_registration_and_login(app, init_db, client):
     assert b"My Travel Requests" in response.data
 
 def test_role_based_access_control(app, init_db, client):
-    # Create an employee and a manager
+    
     with app.app_context():
         AuthService.register_user(
             email='employee@company.com', password='password', role='Employee',
@@ -58,29 +58,29 @@ def test_role_based_access_control(app, init_db, client):
             first_name='Man', last_name='Ager', department='HR', designation='Lead'
         )
 
-    # Login as Employee
+   
     client.post('/login', data={'email': 'employee@company.com', 'password': 'password'})
 
-    # /employee/dashboard now redirects to /travel/ (302) - follow redirect and verify travel page
+   
     response = client.get('/employee/dashboard', follow_redirects=True)
     assert response.status_code == 200
     assert b"My Travel Requests" in response.data
 
-    # Try to access manager dashboard as employee - Forbidden (403)
+    
     response = client.get('/manager/dashboard')
     assert response.status_code == 403
 
-    # Logout
+   
     client.get('/logout')
 
-    # Login as Manager
+   
     client.post('/login', data={'email': 'manager@company.com', 'password': 'password'})
 
-    # Try to access employee dashboard as manager - Forbidden
+    
     response = client.get('/employee/dashboard')
     assert response.status_code == 403
 
-    # Try to access manager dashboard as manager - Allowed (dashboard redirects to manager approvals)
+   
     response = client.get('/manager/dashboard', follow_redirects=True)
     assert response.status_code == 200
     assert b"Manager Approvals Dashboard" in response.data
