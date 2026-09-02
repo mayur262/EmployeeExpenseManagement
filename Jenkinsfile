@@ -10,21 +10,21 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                bat 'pip install -r requirements.txt'
-            }
-        }
-
         stage('Test') {
             steps {
-                bat 'pytest'
+                bat '''
+                    "C:\\Users\\mayur\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" --version
+                    "C:\\Users\\mayur\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" -m pip install -r requirements.txt
+                    "C:\\Users\\mayur\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" -m pytest
+                '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t mayurnaik208/expense-flask:latest .'
+                bat '''
+                    docker build -t mayurnaik208/expense-flask:latest .
+                '''
             }
         }
 
@@ -38,7 +38,7 @@ pipeline {
                     )
                 ]) {
                     bat '''
-                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
                         docker push mayurnaik208/expense-flask:latest
                     '''
                 }
