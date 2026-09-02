@@ -211,7 +211,7 @@ def upload_receipt(claim_id):
         flash('Invalid file type. Allowed formats: PDF, PNG, JPG, JPEG.', 'danger')
 
         # Invalid file type should return HTTP 400
-        return '', 400
+        return 'Invalid file type. Allowed formats: PDF, PNG, JPG, JPEG.', 400
 
     return redirect(url_for('expense.view_claim', claim_id=claim_id))
 
