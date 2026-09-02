@@ -8,7 +8,7 @@ def role_required(*roles):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if not current_user.is_authenticated:
-                return abort(401)  # Unauthorized
+                return abort(401)  
             if current_user.role not in roles:
                 return render_template('unauthorized.html'), 403
             return f(*args, **kwargs)

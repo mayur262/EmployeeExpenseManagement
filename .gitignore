@@ -36,3 +36,9 @@ test_manager.py
 flask11.md
 jwt.md
 explanation.md
+
+# Large build artifacts
+*.tar
+
+# Local secrets
+secret.yaml

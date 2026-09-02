@@ -1,0 +1,27 @@
+services:
+  flask:
+    build: .
+    container_name: expense-flask
+    ports:
+      - "5000:5000"
+    environment:
+      MYSQL_DB_URL: ${MYSQL_DB_URL}
+    depends_on:
+      - mysql
+    networks:
+      - expense-network
+
+  mysql:
+    image: mysql:9.6.0
+    container_name: mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-expense_portal}
+    networks:
+      - expense-network
+
+networks:
+  expense-network:
+    driver: bridge

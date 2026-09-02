@@ -104,4 +104,8 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
 
+    @app.route("/health")
+    def health():
+        return "OK"
+
     return app
