@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -11,19 +12,19 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r requirements.txt'
+                bat 'pip install -r requirements.txt'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'pytest'
+                bat 'pytest'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t mayurnaik208/expense-flask:latest .'
+                bat 'docker build -t mayurnaik208/expense-flask:latest .'
             }
         }
 
@@ -36,8 +37,8 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    bat '''
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                         docker push mayurnaik208/expense-flask:latest
                     '''
                 }
@@ -45,3 +46,4 @@ pipeline {
         }
     }
 }
+```
