@@ -13,6 +13,10 @@ pipeline {
         stage('Test') {
             steps {
                 bat '''
+                    set SECRET_KEY=dev-secret-key-12345
+                    set JWT_SECRET_KEY=dev-secret-key-12345    
+
+
                     "C:\\Users\\mayur\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" --version
                     "C:\\Users\\mayur\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" -m pip install -r requirements.txt
                     "C:\\Users\\mayur\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" -m pytest
