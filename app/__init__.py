@@ -72,7 +72,7 @@ def create_app(config_class=Config):
   
     app.config["JWT_SECRET_KEY"] = app.config.get("SECRET_KEY")
     app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies"]
-    app.config["JWT_COOKIE_CSRF_PROTECT"] = False
+    app.config["JWT_COOKIE_CSRF_PROTECT"] = True
     
     jwt.init_app(app)
 
