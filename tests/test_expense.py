@@ -32,7 +32,21 @@ def client(app):
     return app.test_client()
 
 def login_client(client, email, password):
-    return client.post('/login', data={'email': email, 'password': password}, follow_redirects=True)
+    response = client.post(
+        "/login",
+        data={
+            "email": email,
+            "password": password
+        },
+        follow_redirects=True
+    )
+
+    csrf_cookie = client.get_cookie("csrf_access_token")
+
+    if csrf_cookie:
+        client.environ_base["HTTP_X_CSRF_TOKEN"] = csrf_cookie.value
+
+    return response
 
 def test_create_and_manage_expense_claim(app, init_db, client):
     login_client(client, 'emp@company.com', 'password123')

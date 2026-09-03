@@ -16,13 +16,27 @@ class AnalyticsService:
                 ExpenseItem.category,
                 func.sum(ExpenseItem.amount).label("total")
             )
-            .join(ExpenseClaim, ExpenseClaim.id == ExpenseItem.expense_claim_id)
-            .filter(ExpenseClaim.status.in_(["Approved", "Verified"]))
+            .join(
+                ExpenseClaim,
+                ExpenseClaim.id == ExpenseItem.expense_claim_id
+            )
+            .filter(
+                ExpenseClaim.status.in_(["Approved", "Verified"])
+            )
             .group_by(ExpenseItem.category)
-            .order_by(func.sum(ExpenseItem.amount).desc())
+            .order_by(
+                func.sum(ExpenseItem.amount).desc()
+            )
             .all()
         )
-        return [{"category": r.category, "total": float(r.total)} for r in rows]
+
+        return [
+            {
+                "category": r.category,
+                "total": float(r.total)
+            }
+            for r in rows
+        ]
 
     @staticmethod
     def spend_by_status():
@@ -35,6 +49,7 @@ class AnalyticsService:
             .group_by(ExpenseClaim.status)
             .all()
         )
+
         return [
             {
                 "status": r.status,
@@ -51,12 +66,20 @@ class AnalyticsService:
                 Employee.department,
                 func.sum(ExpenseClaim.total_amount).label("total")
             )
-            .join(ExpenseClaim, ExpenseClaim.employee_id == Employee.id)
-            .filter(ExpenseClaim.status.in_(["Approved", "Verified"]))
+            .join(
+                ExpenseClaim,
+                ExpenseClaim.employee_id == Employee.id
+            )
+            .filter(
+                ExpenseClaim.status.in_(["Approved", "Verified"])
+            )
             .group_by(Employee.department)
-            .order_by(func.sum(ExpenseClaim.total_amount).desc())
+            .order_by(
+                func.sum(ExpenseClaim.total_amount).desc()
+            )
             .all()
         )
+
         return [
             {
                 "department": r.department,
@@ -67,17 +90,30 @@ class AnalyticsService:
 
     @staticmethod
     def monthly_spend_trend(months=6):
-        cutoff = datetime.now(timezone.utc) - timedelta(days=months * 30)
-
-        month_expr = func.date_format(
-            ExpenseClaim.created_at,
-            "%Y-%m"
+        cutoff = (
+            datetime.now(timezone.utc)
+            - timedelta(days=months * 30)
         )
+
+        # SQLite does not support MySQL's DATE_FORMAT().
+        # Use the appropriate function depending on the database.
+        if db.engine.dialect.name == "sqlite":
+            month_expr = func.strftime(
+                "%Y-%m",
+                ExpenseClaim.created_at
+            )
+        else:
+            month_expr = func.date_format(
+                ExpenseClaim.created_at,
+                "%Y-%m"
+            )
 
         rows = (
             db.session.query(
                 month_expr.label("month"),
-                func.sum(ExpenseClaim.total_amount).label("total")
+                func.sum(
+                    ExpenseClaim.total_amount
+                ).label("total")
             )
             .filter(
                 ExpenseClaim.status.in_(
@@ -103,8 +139,12 @@ class AnalyticsService:
         rows = (
             db.session.query(
                 ExpenseClaim.status,
-                func.count(ExpenseClaim.id).label("cnt"),
-                func.sum(ExpenseClaim.total_amount).label("amt")
+                func.count(
+                    ExpenseClaim.id
+                ).label("cnt"),
+                func.sum(
+                    ExpenseClaim.total_amount
+                ).label("amt")
             )
             .group_by(ExpenseClaim.status)
             .all()

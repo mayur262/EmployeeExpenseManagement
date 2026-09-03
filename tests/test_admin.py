@@ -10,80 +10,123 @@ from app.dao.user_dao import UserDAO
 from app.models.policy import ExpensePolicy
 from datetime import date
 
+
 @pytest.fixture
 def app():
     app = create_app(TestingConfig)
     yield app
 
+
 @pytest.fixture
 def init_db(app):
     with app.app_context():
         db.create_all()
-        
+
         AuthService.register_user(
-            email="admin@company.com", password="password123", role="Admin",
-            first_name="Super", last_name="Admin", department="IT", designation="Admin"
+            email="admin@company.com",
+            password="password123",
+            role="Admin",
+            first_name="Super",
+            last_name="Admin",
+            department="IT",
+            designation="Admin"
         )
-       
+
         AuthService.register_user(
-            email="emp@company.com", password="password123", role="Employee",
-            first_name="John", last_name="Doe", department="Sales", designation="Rep"
+            email="emp@company.com",
+            password="password123",
+            role="Employee",
+            first_name="John",
+            last_name="Doe",
+            department="Sales",
+            designation="Rep"
         )
-       
+
         AuthService.register_user(
-            email="fin@company.com", password="password123", role="Finance",
-            first_name="Fin", last_name="Officer", department="Finance", designation="Accountant"
+            email="fin@company.com",
+            password="password123",
+            role="Finance",
+            first_name="Fin",
+            last_name="Officer",
+            department="Finance",
+            designation="Accountant"
         )
+
         yield db
         db.drop_all()
+
 
 @pytest.fixture
 def client(app):
     return app.test_client()
 
+
 def login_client(client, email, password):
-    return client.post("/login", data={"email": email, "password": password}, follow_redirects=True)
+    response = client.post(
+        "/login",
+        data={
+            "email": email,
+            "password": password
+        },
+        follow_redirects=True
+    )
 
+    # Get the CSRF token created by Flask-JWT-Extended
+    csrf_cookie = client.get_cookie("csrf_access_token")
 
+    if csrf_cookie:
+        # Send the CSRF token with subsequent POST requests
+        client.environ_base["HTTP_X_CSRF_TOKEN"] = csrf_cookie.value
+
+    return response
 
 
 def test_admin_access_control(app, init_db, client):
-   
+
     login_client(client, "emp@company.com", "password123")
+
     response = client.get("/admin/")
     assert response.status_code == 403
+
     client.get("/logout")
 
-    
     login_client(client, "fin@company.com", "password123")
+
     response = client.get("/admin/")
     assert response.status_code == 403
+
     client.get("/logout")
 
-  
     login_client(client, "admin@company.com", "password123")
+
     response = client.get("/admin/")
     assert response.status_code == 200
     assert b"System Admin Panel" in response.data
 
 
-
-
 def test_admin_manage_users(app, init_db, client):
+
     login_client(client, "admin@company.com", "password123")
 
-    
     response = client.get("/admin/users")
+
     assert response.status_code == 200
     assert b"emp@company.com" in response.data
     assert b"fin@company.com" in response.data
 
 
 def test_admin_update_user_role(app, init_db, client):
+
     login_client(client, "admin@company.com", "password123")
 
-   
-    response = client.post("/admin/users/2/edit", data={"role": "Manager"}, follow_redirects=True)
+    response = client.post(
+        "/admin/users/2/edit",
+        data={
+            "role": "Manager"
+        },
+        follow_redirects=True
+    )
+
     assert response.status_code == 200
     assert b"updated to Manager" in response.data
 
@@ -93,10 +136,14 @@ def test_admin_update_user_role(app, init_db, client):
 
 
 def test_admin_toggle_user_active(app, init_db, client):
+
     login_client(client, "admin@company.com", "password123")
 
-   
-    response = client.post("/admin/users/2/toggle", follow_redirects=True)
+    response = client.post(
+        "/admin/users/2/toggle",
+        follow_redirects=True
+    )
+
     assert response.status_code == 200
     assert b"deactivated" in response.data
 
@@ -104,8 +151,11 @@ def test_admin_toggle_user_active(app, init_db, client):
         user = UserDAO.get_by_id(2)
         assert user.is_active is False
 
-    
-    response = client.post("/admin/users/2/toggle", follow_redirects=True)
+    response = client.post(
+        "/admin/users/2/toggle",
+        follow_redirects=True
+    )
+
     assert b"activated" in response.data
 
     with app.app_context():
@@ -114,107 +164,207 @@ def test_admin_toggle_user_active(app, init_db, client):
 
 
 def test_admin_cannot_deactivate_self(app, init_db, client):
+
     login_client(client, "admin@company.com", "password123")
-  
-    response = client.post("/admin/users/1/toggle", follow_redirects=True)
-    assert b"cannot deactivate your own account" in response.data.lower() or response.status_code == 200
 
+    response = client.post(
+        "/admin/users/1/toggle",
+        follow_redirects=True
+    )
 
+    assert (
+        b"cannot deactivate your own account" in response.data.lower()
+        or response.status_code == 200
+    )
 
 
 def test_admin_create_policy(app, init_db, client):
+
     login_client(client, "admin@company.com", "password123")
 
-    # Create a Meals policy
-    response = client.post("/admin/policies/new", data={
-        "category": "Meals",
-        "max_limit": "500",
-        "role_restriction": ""
-    }, follow_redirects=True)
+    response = client.post(
+        "/admin/policies/new",
+        data={
+            "category": "Meals",
+            "max_limit": "500",
+            "role_restriction": ""
+        },
+        follow_redirects=True
+    )
+
     assert response.status_code == 200
     assert b"Meals" in response.data
 
     with app.app_context():
-        policy = ExpensePolicy.query.filter_by(category="Meals").first()
+        policy = ExpensePolicy.query.filter_by(
+            category="Meals"
+        ).first()
+
         assert policy is not None
         assert float(policy.max_limit_per_expense) == 500.0
 
 
 def test_admin_update_policy(app, init_db, client):
+
     with app.app_context():
-        PolicyService.create_policy(category="Accommodation", max_limit=2000.0)
-        policy = ExpensePolicy.query.filter_by(category="Accommodation").first()
+        PolicyService.create_policy(
+            category="Accommodation",
+            max_limit=2000.0
+        )
+
+        policy = ExpensePolicy.query.filter_by(
+            category="Accommodation"
+        ).first()
+
         policy_id = policy.id
 
-    login_client(client, "admin@company.com", "password123")
-    response = client.post(f"/admin/policies/{policy_id}/edit", data={
-        "category": "Accommodation",
-        "max_limit": "3000",
-        "role_restriction": "Employee"
-    }, follow_redirects=True)
+    login_client(
+        client,
+        "admin@company.com",
+        "password123"
+    )
+
+    response = client.post(
+        f"/admin/policies/{policy_id}/edit",
+        data={
+            "category": "Accommodation",
+            "max_limit": "3000",
+            "role_restriction": "Employee"
+        },
+        follow_redirects=True
+    )
+
     assert response.status_code == 200
 
     with app.app_context():
-        policy = ExpensePolicy.query.filter_by(category="Accommodation").first()
+        policy = ExpensePolicy.query.filter_by(
+            category="Accommodation"
+        ).first()
+
         assert float(policy.max_limit_per_expense) == 3000.0
         assert policy.role_restriction == "Employee"
 
 
 def test_admin_delete_policy(app, init_db, client):
+
     with app.app_context():
-        PolicyService.create_policy(category="Flight", max_limit=10000.0)
-        policy = ExpensePolicy.query.filter_by(category="Flight").first()
+        PolicyService.create_policy(
+            category="Flight",
+            max_limit=10000.0
+        )
+
+        policy = ExpensePolicy.query.filter_by(
+            category="Flight"
+        ).first()
+
         policy_id = policy.id
 
-    login_client(client, "admin@company.com", "password123")
-    response = client.post(f"/admin/policies/{policy_id}/delete", follow_redirects=True)
+    login_client(
+        client,
+        "admin@company.com",
+        "password123"
+    )
+
+    response = client.post(
+        f"/admin/policies/{policy_id}/delete",
+        follow_redirects=True
+    )
+
     assert response.status_code == 200
 
     with app.app_context():
-        policy = ExpensePolicy.query.filter_by(category="Flight").first()
+        policy = ExpensePolicy.query.filter_by(
+            category="Flight"
+        ).first()
+
         assert policy is None
 
 
+def test_policy_limit_enforced_on_expense_item(
+    app,
+    init_db,
+    client
+):
 
-
-def test_policy_limit_enforced_on_expense_item(app, init_db, client):
-    
     with app.app_context():
-        
-        PolicyService.create_policy(category="Meals", max_limit=300.0)
 
-        claim = ExpenseService.create_expense_claim(employee_id=2, title="Dinner Claim")
-
-       
-        item = ExpenseService.add_expense_item(
-            claim_id=claim.id, category="Meals", amount=250.0, expense_date=date(2026, 8, 1)
+        PolicyService.create_policy(
+            category="Meals",
+            max_limit=300.0
         )
+
+        claim = ExpenseService.create_expense_claim(
+            employee_id=2,
+            title="Dinner Claim"
+        )
+
+        item = ExpenseService.add_expense_item(
+            claim_id=claim.id,
+            category="Meals",
+            amount=250.0,
+            expense_date=date(2026, 8, 1)
+        )
+
         assert item is not None
 
-      
         try:
             ExpenseService.add_expense_item(
-                claim_id=claim.id, category="Meals", amount=400.0, expense_date=date(2026, 8, 2)
+                claim_id=claim.id,
+                category="Meals",
+                amount=400.0,
+                expense_date=date(2026, 8, 2)
             )
+
             assert False, "Should have raised ValueError"
+
         except ValueError as e:
-            assert "policy limit" in str(e).lower() or "exceeds" in str(e).lower()
+            assert (
+                "policy limit" in str(e).lower()
+                or "exceeds" in str(e).lower()
+            )
 
 
-def test_policy_limit_enforced_via_ui(app, init_db, client):
-   
+def test_policy_limit_enforced_via_ui(
+    app,
+    init_db,
+    client
+):
+
     with app.app_context():
-        PolicyService.create_policy(category="Meals", max_limit=200.0)
-        claim = ExpenseService.create_expense_claim(employee_id=2, title="Lunch Claim")
+
+        PolicyService.create_policy(
+            category="Meals",
+            max_limit=200.0
+        )
+
+        claim = ExpenseService.create_expense_claim(
+            employee_id=2,
+            title="Lunch Claim"
+        )
+
         claim_id = claim.id
 
-    login_client(client, "emp@company.com", "password123")
-    response = client.post(f"/expense/{claim_id}/item", data={
-        "category": "Meals",
-        "amount": "500",
-        "expense_date": "2026-08-01",
-        "description": "Fancy lunch"
-    }, follow_redirects=True)
+    login_client(
+        client,
+        "emp@company.com",
+        "password123"
+    )
+
+    response = client.post(
+        f"/expense/{claim_id}/item",
+        data={
+            "category": "Meals",
+            "amount": "500",
+            "expense_date": "2026-08-01",
+            "description": "Fancy lunch"
+        },
+        follow_redirects=True
+    )
+
     assert response.status_code == 200
+
     # Should flash the policy violation error
-    assert b"policy limit" in response.data.lower() or b"exceeds" in response.data.lower()
+    assert (
+        b"policy limit" in response.data.lower()
+        or b"exceeds" in response.data.lower()
+    )
