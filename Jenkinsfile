@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -24,6 +23,26 @@ pipeline {
                     "C:\\Users\\mayur\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" -m pip install -r requirements.txt
                     "C:\\Users\\mayur\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" -m pytest
                 '''
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'sonarscanner'
+
+                    withSonarQubeEnv('SonarQube') {
+                        bat "\"${scannerHome}\\bin\\sonar-scanner.bat\""
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
 
@@ -81,4 +100,3 @@ pipeline {
         }
     }
 }
-
